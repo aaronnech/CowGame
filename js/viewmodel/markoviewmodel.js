@@ -16,4 +16,4 @@ MarkoViewModel.prototype.render = function() {
 
 MarkoViewModel.prototype.update = function() {
 	// Update the models every game loop here
-}
+};
