@@ -1,6 +1,6 @@
 function Marko() {
 	this.base = Game;
-	this.base.apply(this, game);
+	this.base.apply(this);
 
 	this.controller = new ClientController(this);
 }

@@ -8,7 +8,8 @@ Action.NO_SOURCE = null;
 
 Action.prototype.fire = function(source, data) {
 	for (var i = 0; i < this.bindings_.length; i++) {
-		this.bindings_[i].callback(source, data);
+		this.bindings_[i].callback.apply(
+			this.bindings_[i].binder, source, data);
 	}
 };
 

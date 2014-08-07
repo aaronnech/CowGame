@@ -8,7 +8,8 @@ Action.NO_SOURCE = null;
 
 Action.prototype.fire = function(source, data) {
 	for (var i = 0; i < this.bindings_.length; i++) {
-		this.bindings_[i].callback(source, data);
+		this.bindings_[i].callback.apply(
+			this.bindings_[i].binder, source, data);
 	}
 };
 
@@ -198,7 +199,7 @@ MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
 
 MarkoViewModel.prototype.render = function() {
-	renderer.render(stage);
+	this.pixiRenderer_.render(this.pixiStage_);
 };
 
 
@@ -264,7 +265,7 @@ Game.prototype.run = function(fps) {
 	this.loopInterval_ = setInterval(loop, this.oneFrameTime_);
 };function Marko() {
 	this.base = Game;
-	this.base.apply(this, game);
+	this.base.apply(this);
 
 	this.controller = new ClientController(this);
 }

@@ -10,7 +10,7 @@ MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
 
 MarkoViewModel.prototype.render = function() {
-	renderer.render(stage);
+	this.pixiRenderer_.render(this.pixiStage_);
 };
 
 
