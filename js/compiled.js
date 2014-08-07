@@ -192,7 +192,7 @@ WorkerView.prototype.notify = function() {
 
 	this.pixiStage_ = new PIXI.Stage(0x66FF99);
 	this.pixiRenderer_ = PIXI.autoDetectRenderer(400, 300);
-	document.body.appendChild(renderer.view);
+	document.body.appendChild(this.pixiRenderer_.view);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
@@ -271,20 +271,20 @@ Game.prototype.run = function(fps) {
 Marko.prototype = Object.create(Game.prototype);
 
 Marko.prototype.onRender = function() {
-	Actions.GameActions.RENDER.fire(Action.NO_SOURCE);
+	Action.GameActions.RENDER.fire(Action.NO_SOURCE);
 };
 
 
 Marko.prototype.onUpdate = function(delta) {
-	Actions.GameActions.UPDATE.fire(Action.NO_SOURCE, delta);
+	Action.GameActions.UPDATE.fire(Action.NO_SOURCE, delta);
 };
 
 
 Marko.prototype.onStart = function() {
-	Actions.GameActions.START.fire(Action.NO_SOURCE);
+	Action.GameActions.START.fire(Action.NO_SOURCE);
 };
 
 
 Marko.prototype.onShutDown = function() {
-	Actions.GameActions.STOP.fire(Action.NO_SOURCE);
+	Action.GameActions.STOP.fire(Action.NO_SOURCE);
 };
