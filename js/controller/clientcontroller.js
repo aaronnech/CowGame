@@ -20,7 +20,7 @@ ClientController.prototype.onRender = function() {
 };
 
 
-ClientController.prototype.onRender = function() {
+ClientController.prototype.onUpdate = function() {
 	this.viewModel_.update();
 };
 

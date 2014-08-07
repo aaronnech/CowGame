@@ -58,7 +58,7 @@ ClientController.prototype.onRender = function() {
 };
 
 
-ClientController.prototype.onRender = function() {
+ClientController.prototype.onUpdate = function() {
 	this.viewModel_.update();
 };
 
@@ -238,30 +238,30 @@ Game.prototype.update_ = function(delta) {
 };
 
 
-Game.prototype.loop_ = function() {
-	var delta = 1;
-	if (this.lastUpdate_) {
-	    var now = Date.now();
-	    delta = now - this.lastUpdate_;
-	    lastUpdate = now;
-	} else {
-		this.lastUpdate_ = Date.now();
-	}
-
-	if (!this.running_) {
-		clearInterval(this.loopInterval_);
-		this.onShutDown();
-	}
-	this.update(delta);
-	this.render();
-};
-
-
 Game.prototype.run = function(fps) {
+	var self = this;
+	var loop = function() {
+		var delta = 1;
+		if (self.lastUpdate_) {
+		    var now = Date.now();
+		    delta = now - self.lastUpdate_;
+		    self.lastUpdate_ = now;
+		} else {
+			self.lastUpdate_ = Date.now();
+		}
+
+		if (!self.running_) {
+			clearInterval(self.loopInterval_);
+			self.onShutDown();
+		}
+		self.update_(delta);
+		self.render_();
+	};
+
 	this.oneFrameTime_ = 1000 / fps;
 	this.running_ = true;
 	this.onStart();
-	this.loopInterval_ = setInterval(this.loop_, this.oneFrameTime_);
+	this.loopInterval_ = setInterval(loop, this.oneFrameTime_);
 };function Marko() {
 	this.base = Game;
 	this.base.apply(this, game);
