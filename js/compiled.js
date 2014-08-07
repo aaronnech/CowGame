@@ -242,7 +242,7 @@ Game.prototype.loop_ = function() {
 	var delta = 1;
 	if (this.lastUpdate_) {
 	    var now = Date.now();
-	    delta = now - lastUpdate;
+	    delta = now - this.lastUpdate_;
 	    lastUpdate = now;
 	} else {
 		this.lastUpdate_ = Date.now();
