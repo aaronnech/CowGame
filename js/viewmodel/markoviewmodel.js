@@ -4,7 +4,7 @@ function MarkoViewModel() {
 
 	this.pixiStage_ = new PIXI.Stage(0x66FF99);
 	this.pixiRenderer_ = PIXI.autoDetectRenderer(400, 300);
-	document.body.appendChild(renderer.view);
+	document.body.appendChild(this.pixiRenderer_.view);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 

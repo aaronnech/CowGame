@@ -1,5 +1,4 @@
 function Action() {
-	this.type_ = type;
 	this.bindings_ = [];
 }
 
