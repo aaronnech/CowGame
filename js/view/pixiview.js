@@ -1,6 +1,6 @@
 function PixiView(model, pixiStage) {
-	this.base = View;
-	this.base.apply(this, model);
+	this.model_ = model;
+	this.model_.subscribeView(this);
 
 	this.pixiStage_ = pixiStage;
 
@@ -8,7 +8,11 @@ function PixiView(model, pixiStage) {
 
 	this.pixiStage_.addChild(this.pixiChild_);
 }
-PixiView.prototype = Object.create(View.prototype);
+
+
+PixiView.prototype.getModel = function() {
+	return this.model_;
+};
 
 
 PixiView.prototype.getPixiStageMember = function() {

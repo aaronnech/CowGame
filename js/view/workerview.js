@@ -1,8 +1,8 @@
 function WorkerView(workerModel, pixiStage) {
 	this.base = PixiView;
-	this.base.apply(this, workerModel, pixiStage);
+	this.base.apply(this, [workerModel, pixiStage]);
 }
-WorkerView.prototype = Object.create(PixiView);
+window.inherits(WorkerView, PixiView);
 
 WorkerView.prototype.makePixiStageMember = function() {
 	var graphics = new PIXI.Graphics();

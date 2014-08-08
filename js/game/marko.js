@@ -4,7 +4,7 @@ function Marko() {
 
 	this.controller = new ClientController(this);
 }
-Marko.prototype = Object.create(Game.prototype);
+window.inherits(Marko, Game);
 
 Marko.prototype.onRender = function() {
 	Action.GameActions.RENDER.fire(Action.NO_SOURCE);

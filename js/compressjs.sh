@@ -2,11 +2,12 @@
 
 SERVICE_URL=http://closure-compiler.appspot.com/compile
 DEBUG=true
-NEWFILE="compiled.js"
+DEBUGFILE="debug.js"
+COMPILEFILE="compiled.js"
 FILELIST="controller/*.js model/*.js util/*.js view/*.js viewmodel/*.js game/*.js"
 
 if ${DEBUG} ; then
-	cat ${FILELIST} > ${NEWFILE}
+	cat ${FILELIST} > ${DEBUGFILE}
 else
 
 	for f in ${FILELIST}
@@ -50,7 +51,7 @@ else
 		print "Compressed size: %db, gziped: %db" % (data["statistics"]["compressedSize"], data["statistics"]["compressedGzipSize"])
 		print "Compression rate: %.2f" % (float(data["statistics"]["compressedSize"]) / int(data["statistics"]["originalSize"]))
 
-		filename = "'${NEWFILE}'"
+		filename = "'${COMPILEFILE}'"
 		f = open(filename, "w")
 		f.write(data["compiledCode"])
 

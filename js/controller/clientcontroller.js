@@ -1,10 +1,10 @@
 function ClientController(game) {
 	this.base = Controller;
-	this.base.apply(this, game);
+	this.base.apply(this, [game]);
 
 	this.viewModel_ = new MarkoViewModel();
 }
-ClientController.prototype = Object.create(Controller.prototype);
+window.inherits(ClientController, Controller);
 
 
 ClientController.prototype.setBindings = function() {
