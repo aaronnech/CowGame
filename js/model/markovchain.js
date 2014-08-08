@@ -48,6 +48,7 @@ MarkovChain.prototype.removeMarkovEdge = function(edge) {
         var index = edges.indexOf(edge);
         if (index > -1) {
             edges.splice(index, 1);
+            return true;
         }
     }
     return false;
