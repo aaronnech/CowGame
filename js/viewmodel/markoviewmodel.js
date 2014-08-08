@@ -12,11 +12,13 @@ function MarkoViewModel() {
 	// Setup renderer
 	this.pixiStage_ = new PIXI.Stage(0x66FF99);
 	this.pixiRenderer_ = PIXI.autoDetectRenderer(WORLD_WIDTH, WORLD_HEIGHT);
+	this.pixiWorld_ = new PIXI.DisplayObjectContainer();
+	this.pixiStage_.addChild(this.pixiWorld_);
 	document.body.appendChild(this.pixiRenderer_.view);
 
 	// Camera
 	this.camera_ = new Camera();
-	this.cameraView_ = new CameraView(this.camera_, this.pixiStage_);
+	this.cameraView_ = new CameraView(this.camera_, this.pixiStage_, this.pixiWorld_);
 	var cameraContainer = this.cameraView_.getPixiStageMember();
 
 	// Map
@@ -25,7 +27,7 @@ function MarkoViewModel() {
 		NUMBER_OF_Y_TILES,
 		TILE_HEIGHT,
 	    TILE_WIDTH);
-	this.mapView_ = new MapView(this.map_, cameraContainer);
+	this.mapView_ = new MapView(this.map_, this.pixiWorld_);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
@@ -39,4 +41,5 @@ MarkoViewModel.prototype.render = function() {
 MarkoViewModel.prototype.update = function() {
 	// Update the models that have to be updated
 	// every game loop here
+	this.camera_.moveX(2);
 };

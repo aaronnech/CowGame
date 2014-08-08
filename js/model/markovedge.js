@@ -16,28 +16,28 @@ function MarkovEdge(head, tail, probability) {
  */
 MarkovEdge.prototype.getProbability = function() {
     return this.probability_;
-}
+};
 
 /**
  * @param {double} probability - The new probability of this edge
  */
 MarkovEdge.prototype.setProbability = function(probability) {
     this.probability_ = probability;
-}
+};
 
 /**
  * @return {MarkovNode} The head node of this edge
  */
 MarkovEdge.prototype.getHead = function() {
     return this.head_;
-}
+};
 
 /**
  * @return {MarkovNode} The tail node of this edge
  */
 MarkovEdge.prototype.getTail = function() {
     return this.tail_;
-}
+};
 
 /**
  * Returns true if and only if other is equivalent to this edge.
@@ -49,5 +49,5 @@ MarkovEdge.prototype.equals = function(other) {
     return other && this.head_.equals(other.getHead())
         && this.tail_.equals(other.getTail())
         && this.probability_ == other.getProbability();
-}
+};
 

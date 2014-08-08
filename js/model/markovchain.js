@@ -10,7 +10,7 @@ function MarkovChain() {
  */
 MarkovChain.prototype.isNodeInChain = function(node) {
     return (node in this.markovNodes_);
-}
+};
 
 /**
  * Adds a MarkovNode into the chain.
@@ -21,7 +21,7 @@ MarkovChain.prototype.addMarkovNode = function(node) {
     if (!this.isNodeInChain(node)) {
         this.markovNodes_[node] = [];
     }
-}
+};
 
 /**
  * Adds a MarkovEdge and the head and tail of the edge (if necessary) into the chain.
@@ -33,7 +33,7 @@ MarkovChain.prototype.addMarkovEdge = function(edge) {
     this.addMarkovNode(edge.getHead());
     this.addMarkovNode(tail);
     this.markovNodes_[tail].append(edge);
-}
+};
 
 /**
  * Removes a MarkovEdge from the chain.
@@ -52,7 +52,7 @@ MarkovChain.prototype.removeMarkovEdge = function(edge) {
         }
     }
     return false;
-}
+};
 
 /**
  * Returns the neighbors of the node in the chain.
@@ -65,11 +65,11 @@ MarkovChain.prototype.getMarkovEdges = function(node) {
         return this.markovNodes_[node];
     }
     return null;
-}
+};
 
 /**
  * @return {[MarkovNode]} A list of nodes currently in the chain
  */
 MarkovChain.prototype.getMarkovNodes = function() {
     return Object.keys(this.markovNodes_);
-}
+};

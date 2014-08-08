@@ -10,11 +10,11 @@ function MarkovNode() {
  */
 MarkovNode.prototype.equals = function(other) {
     return other && this == other;
-}
+};
 
 MarkovNode.NodeStates = {
     RENDER : new MarkovNode(),
     UPDATE : new MarkovNode(),
     STOP : new MarkovNode(),
     START : new MarkovNode()
-}
+};
