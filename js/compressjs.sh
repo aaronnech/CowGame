@@ -6,7 +6,11 @@ NEWFILE="compiled.js"
 FILELIST="controller/*.js model/*.js util/*.js view/*.js viewmodel/*.js game/*.js"
 
 if ${DEBUG} ; then
-	cat ${FILELIST} > ${NEWFILE}
+  	rm -f ${NEWFILE}
+  	for file in ${FILELIST}; do
+    		cat $file >> $NEWFILE
+    		echo "" >> $NEWFILE
+  	done
 else
 
 	for f in ${FILELIST}
