@@ -28,7 +28,7 @@ Camera.prototype.panLeft = function() {
 
 
 Camera.prototype.panRight = function() {
-	this.moveX(+Camera.PAN_SPEED);
+	this.moveX(Camera.PAN_SPEED);
 };
 
 
