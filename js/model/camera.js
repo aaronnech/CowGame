@@ -13,12 +13,12 @@ Camera.PAN_SPEED = 2;
 
 
 Camera.prototype.panUp = function() {
-	this.moveY(Camera.PAN_SPEED);
+	this.moveY(-Camera.PAN_SPEED);
 };
 
 
 Camera.prototype.panDown = function() {
-	this.moveY(-Camera.PAN_SPEED);
+	this.moveY(Camera.PAN_SPEED);
 };
 
 

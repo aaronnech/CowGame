@@ -128,22 +128,22 @@ Camera.PAN_SPEED = 2;
 
 
 Camera.prototype.panUp = function() {
-	this.moveY(-Camera.PAN_SPEED);
-};
-
-
-Camera.prototype.panDown = function() {
 	this.moveY(Camera.PAN_SPEED);
 };
 
 
+Camera.prototype.panDown = function() {
+	this.moveY(-Camera.PAN_SPEED);
+};
+
+
 Camera.prototype.panLeft = function() {
-	this.moveX(Camera.PAN_SPEED);
+	this.moveX(-Camera.PAN_SPEED);
 };
 
 
 Camera.prototype.panRight = function() {
-	this.moveX(-Camera.PAN_SPEED);
+	this.moveX(Camera.PAN_SPEED);
 };
 
 
@@ -218,153 +218,66 @@ Map.prototype.getTile = function(x, y) {
 	} else {
 		return null;
 	}
-};function MarkovChain() {
-	this.markovNodes_ = {};
-}
-
-/**
- * Returns whether or not a node is in the chain.
- *
- * @param  {MarkovNode} node - The node to check
- * @return {boolean} True if and only if the node is in the chain, false otherwise
+};/**
+ * [MarkovChain description]
+ * @param {[type]} states [description]
  */
-MarkovChain.prototype.isNodeInChain = function(node) {
-    return (node in this.markovNodes_);
-};
+function MarkovChain(states) {
+	this.transitionMatrix_ = new Array(states.length);
+    this.stateToIndex_ = [];
+    this.indexToState_ = [];
+    this.currentStateIndex_ = 0;
 
-/**
- * Adds a MarkovNode into the chain.
- *
- * @param {MarkovNode} node - The node to add to the chain
- */
-MarkovChain.prototype.addMarkovNode = function(node) {
-    if (!this.isNodeInChain(node)) {
-        this.markovNodes_[node] = [];
+    for (var i = 0; i < states.length; i++) {
+        this.transitionMatrix_[i] = new Array(states.length);
+        /* Assign the state and index in the matrix */
+        this.stateToIndex_[states[i]] = i;
+        this.indexToState_[i] = states[i];
     }
 };
 
-/**
- * Adds a MarkovEdge and the head and tail of the edge (if necessary) into the chain.
- *
- * @param {MarkovEdge} edge - The edge to add to the chain
- */
-MarkovChain.prototype.addMarkovEdge = function(edge) {
-    var tail = edge.getTail();
-    this.addMarkovNode(edge.getHead());
-    this.addMarkovNode(tail);
-    this.markovNodes_[tail].append(edge);
+MarkovChain.prototype.setProbability = function(tailState, headState, probability) {
+    this.transitionMatrix_[this.stateToIndex_[tailState]][this.stateToIndex_[headState]] = probability;
 };
 
-/**
- * Removes a MarkovEdge from the chain.
- *
- * @param  {MarkovEdge} edge - The edge to remove from the chain
- * @return {boolean} True if and only if the edge was removed, false otherwise
- */
-MarkovChain.prototype.removeMarkovEdge = function(edge) {
-    var tail = edge.getTail();
-    if (this.isNodeInChain(tail)) {
-        var edges = this.getMarkovEdges(tail);
-        var index = edges.indexOf(edge);
-        if (index > -1) {
-            edges.splice(index, 1);
-            return true;
+MarkovChain.prototype.getProbability = function(tailState, headState) {
+    return this.transitionMatrix_[this.stateToIndex_[tailState]][this.stateToIndex_[headState]];
+};
+
+MarkovChain.prototype.getNeighborStates = function(state) {
+    var index = this.stateToIndex_[state];
+    var result = {"states" : []};
+    for (var i = 0; i < this.transitionMatrix_.length[index]; i++) {
+        result.states.push({"state" : this.indexToState_[i], "probability" : this.transitionMatrix_[index][i]});
+    }
+    return result;
+};
+
+MarkovChain.prototype.switchToState = function(state) {
+    this.currentStateIndex_ = this.indexToState_(state);
+};
+
+MarkovChain.prototype.getCurrentState = function() {
+    return this.indexToState_(this.currentStateIndex_);
+}
+
+MarkovChain.prototype.update = function() {
+    var probabilites = this.getNeighborStates(this.indexToState_(this.currentStateIndex_));
+    for (var i = 1; i < probabilities.length; i++) {
+        probabilities[i] += probabilities[i - 1];
+    }
+
+    var random = Math.random();
+    for (var i = 0; i < probabilities.length; i++) {
+        if (random < probabilities[i]) {
+            this.currentStateIndex_ = i;
+            return this.indexToState_[i];
         }
     }
-    return false;
-};
-
-/**
- * Returns the neighbors of the node in the chain.
- *
- * @param  {MarkovNode} node - The Markov node to get the edges for
- * @return {[MarkovEdge]} A list of the node's edges, {null} if the node is not in the chain
- */
-MarkovChain.prototype.getMarkovEdges = function(node) {
-    if (this.isNodeInChain(node)) {
-        return this.markovNodes_[node];
-    }
-    return null;
-};
-
-/**
- * @return {[MarkovNode]} A list of nodes currently in the chain
- */
-MarkovChain.prototype.getMarkovNodes = function() {
-    return Object.keys(this.markovNodes_);
-};
-/**
- * A MarkovEdge represents a directed edge consisting of a head and a tail MarkovNode.
- *
- * @param {MarkovNode} head - The head node of the edge
- * @param {MarkovNode} tail - The tail node of the edge
- * @param {double} probability - The probability of this edge being taken
- */
-function MarkovEdge(head, tail, probability) {
-    this.head_ = head;
-    this.tail_ = tail;
-    this.probability_ = probability;
 }
 
-/**
- * @return {double} The probability of this edge being taken from tail to head.
- */
-MarkovEdge.prototype.getProbability = function() {
-    return this.probability_;
-};
-
-/**
- * @param {double} probability - The new probability of this edge
- */
-MarkovEdge.prototype.setProbability = function(probability) {
-    this.probability_ = probability;
-};
-
-/**
- * @return {MarkovNode} The head node of this edge
- */
-MarkovEdge.prototype.getHead = function() {
-    return this.head_;
-};
-
-/**
- * @return {MarkovNode} The tail node of this edge
- */
-MarkovEdge.prototype.getTail = function() {
-    return this.tail_;
-};
-
-/**
- * Returns true if and only if other is equivalent to this edge.
- *
- * @param  {MarkovEdge} other - The other edge to compare
- * @return {boolean} True if and only if the other edge is equivalent
- */
-MarkovEdge.prototype.equals = function(other) {
-    return other && this.head_.equals(other.getHead())
-        && this.tail_.equals(other.getTail())
-        && this.probability_ == other.getProbability();
-};
-
-function MarkovNode() {
-
-}
-
-/**
- * Returns true if and only if other is equivalent to this node.
- *
- * @param  {MarkovNode} other - The other node to compare
- * @return {boolean} True if and only if the other node is equivalent
- */
-MarkovNode.prototype.equals = function(other) {
-    return other && this == other;
-};
-
-MarkovNode.NodeStates = {
-    RENDER : new MarkovNode(),
-    UPDATE : new MarkovNode(),
-    STOP : new MarkovNode(),
-    START : new MarkovNode()
+MarkovChain.PossibleStates = {
+    // ...
 };function Model() {
 	this.views_ = [];
 }
