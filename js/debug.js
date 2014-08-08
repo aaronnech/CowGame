@@ -36,6 +36,10 @@ Action.GameActions = {
 }
 
 Action.ViewActions = {
+	PAN_RIGHT : new Action(),
+	PAN_LEFT : new Action(),
+	PAN_UP : new Action(),
+	PAN_DOWN : new Action(),
 	START_DRAG_SELECT : new Action()
 };function ClientController(game) {
 	this.base = Controller;
@@ -47,10 +51,14 @@ window.inherits(ClientController, Controller);
 
 
 ClientController.prototype.setBindings = function() {
-	this.bind(Action.GameActions.RENDER, this.onRender);
-	this.bind(Action.GameActions.UPDATE, this.onUpdate);
+	var vm = this.viewModel_;
+	this.bind(Action.GameActions.RENDER, vm.render);
+	this.bind(Action.GameActions.UPDATE, vm.update);
 
-	this.bind(Action.ViewActions.START_DRAG_SELECT, this.onDragStart);
+	this.bind(Action.ViewActions.PAN_UP, vm.panCameraUp);
+	this.bind(Action.ViewActions.PAN_DOWN, vm.panCameraDown);
+	this.bind(Action.ViewActions.PAN_LEFT, vm.panCameraLeft);
+	this.bind(Action.ViewActions.PAN_RIGHT, vm.panCameraRight);
 };
 
 
@@ -61,16 +69,6 @@ ClientController.prototype.onRender = function() {
 
 ClientController.prototype.onUpdate = function() {
 	this.viewModel_.update();
-};
-
-
-ClientController.prototype.onDragStart = function() {
-	console.log('drag start');
-};
-
-
-ClientController.prototype.onClickScreen = function() {
-	console.log('Hello');
 };function Controller(game) {
 	this.setBindings();
 }
@@ -386,7 +384,9 @@ CameraView.prototype.notify = function() {
 	this.world_.position.x = camera.getX();
 	this.world_.position.y = camera.getY();
 };function Input() {
-	this.keyHitBindings_ = [];
+	this.keyHitBindings_ = {};
+	this.keyDownBindings_ = {};
+	this.keyDownState_ = {};
 
 	// Listen to browser key presses
 	this.addBrowserEventListener_('keypress', function(e) {
@@ -400,6 +400,22 @@ CameraView.prototype.notify = function() {
 	    		bindings[i].action.fire(this, bindings[i].data);
 	    	}
 	    }
+	});
+
+	this.addBrowserEventListener_('keydown', function(e) {
+	    var event = e || window.event;
+	    var code = event.which || event.charCode || event.keyCode;
+	    var mapKey = '' + code;
+
+	    this.keyDownState_.[mapKey] = true;
+	});
+
+	this.addBrowserEventListener_('keyup', function(e) {
+	    var event = e || window.event;
+	    var code = event.which || event.charCode || event.keyCode;
+	    var mapKey = '' + code;
+
+	    this.keyDownState_.[mapKey] = false;
 	});
 }
 
@@ -423,11 +439,36 @@ Input.prototype.addBrowserEventListener_ = function(name, callback) {
 };
 
 
-Input.prototype.bindKeyHitAction = function(key, action, data) {
-	if (!this.keyHitBindings_[key]) {
-		this.keyHitBindings_[key] = [];
+Input.prototype.update = function() {
+	for (key in this.keyDownState_) {
+		if (!this.keyDownState_.hasOwnProperty(key)) {
+			continue;
+		}
+		if (this.keyDownState_[key] && this.keyHitBindings_[key]) {
+	    	var bindings = this.keyHitBindings_[key];
+	    	for (var i = 0; i < bindings.length; i++) {
+	    		bindings[i].action.fire(this, bindings[i].data);
+	    	}
+		}
 	}
-	this.keyHitBindings_[key].push({'action' : action, 'data' : data});
+};
+
+
+Input.prototype.bindMapKeyToAction_ = function(mapKey, map, action, data) {
+	if (!map[mapKey]) {
+		map[mapKey] = [];
+	}
+	map[mapKey].push({'action' : action, 'data' : data});
+};
+
+
+Input.prototype.bindKeyHitAction = function(key, action, data) {
+	bindMapKeyToAction_(key, this.keyHitBindings_, action, data);
+};
+
+
+Input.prototype.bindKeyDownAction = function(key, action, data) {
+	bindMapKeyToAction_(key, this.keyDownBindings_, action, data);
 };function MapView(mapModel, pixiStage) {
 	this.base = PixiView;
 	this.base.apply(this, [mapModel, pixiStage]);
@@ -531,9 +572,23 @@ WorkerView.prototype.notify = function() {
 		TILE_HEIGHT,
 	    TILE_WIDTH);
 	this.mapView_ = new MapView(this.map_, this.pixiWorld_);
+
+
+	// Input processor
+	// and input action bindings
+	this.input_ = new Input();
+
+	// Camera panning
+	this.input_.bindKeyDownAction(
+		Input.KEYS.UP, Action.ViewActions.PAN_UP);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.DOWN, Action.ViewActions.PAN_DOWN);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.RIGHT, Action.ViewActions.PAN_RIGHT);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
-
 
 MarkoViewModel.prototype.render = function() {
 	// Render the pixi stage
@@ -544,7 +599,27 @@ MarkoViewModel.prototype.render = function() {
 MarkoViewModel.prototype.update = function() {
 	// Update the models that have to be updated
 	// every game loop here
-	this.camera_.moveX(2);
+	this.input_.update();
+};
+
+
+MarkoViewModel.panCameraLeft = function() {
+	this.camera_.panLeft();
+};
+
+
+MarkoViewModel.panCameraRight = function() {
+	this.camera_.panRight();
+};
+
+
+MarkoViewModel.panCameraUp = function() {
+	this.camera_.panUp();
+};
+
+
+MarkoViewModel.panCameraDown = function() {
+	this.camera_.panDown();
 };function ViewModel() {
 	
 }function Game() {

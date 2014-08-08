@@ -28,9 +28,23 @@ function MarkoViewModel() {
 		TILE_HEIGHT,
 	    TILE_WIDTH);
 	this.mapView_ = new MapView(this.map_, this.pixiWorld_);
+
+
+	// Input processor
+	// and input action bindings
+	this.input_ = new Input();
+
+	// Camera panning
+	this.input_.bindKeyDownAction(
+		Input.KEYS.UP, Action.ViewActions.PAN_UP);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.DOWN, Action.ViewActions.PAN_DOWN);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.RIGHT, Action.ViewActions.PAN_RIGHT);
+	this.input_.bindKeyDownAction(
+		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
-
 
 MarkoViewModel.prototype.render = function() {
 	// Render the pixi stage
@@ -41,5 +55,25 @@ MarkoViewModel.prototype.render = function() {
 MarkoViewModel.prototype.update = function() {
 	// Update the models that have to be updated
 	// every game loop here
-	this.camera_.moveX(2);
+	this.input_.update();
+};
+
+
+MarkoViewModel.panCameraLeft = function() {
+	this.camera_.panLeft();
+};
+
+
+MarkoViewModel.panCameraRight = function() {
+	this.camera_.panRight();
+};
+
+
+MarkoViewModel.panCameraUp = function() {
+	this.camera_.panUp();
+};
+
+
+MarkoViewModel.panCameraDown = function() {
+	this.camera_.panDown();
 };

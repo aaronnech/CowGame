@@ -36,5 +36,9 @@ Action.GameActions = {
 }
 
 Action.ViewActions = {
+	PAN_RIGHT : new Action(),
+	PAN_LEFT : new Action(),
+	PAN_UP : new Action(),
+	PAN_DOWN : new Action(),
 	START_DRAG_SELECT : new Action()
 };
