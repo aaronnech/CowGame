@@ -1,4 +1,5 @@
 function Input() {
+	var self = this;
 	this.keyHitBindings_ = {};
 	this.keyDownBindings_ = {};
 	this.keyDownState_ = {};
@@ -9,10 +10,10 @@ function Input() {
 	    var code = event.which || event.charCode || event.keyCode;
 	    var mapKey = '' + code;
 
-	    if (this.keyHitBindings_[mapKey]) {
-	    	var bindings = this.keyHitBindings_[mapKey];
+	    if (self.keyHitBindings_[mapKey]) {
+	    	var bindings = self.keyHitBindings_[mapKey];
 	    	for (var i = 0; i < bindings.length; i++) {
-	    		bindings[i].action.fire(this, bindings[i].data);
+	    		bindings[i].action.fire(self, bindings[i].data);
 	    	}
 	    }
 	});
@@ -22,7 +23,7 @@ function Input() {
 	    var code = event.which || event.charCode || event.keyCode;
 	    var mapKey = '' + code;
 
-	    this.keyDownState_[mapKey] = true;
+	    self.keyDownState_[mapKey] = true;
 	});
 
 	this.addBrowserEventListener_('keyup', function(e) {
@@ -30,7 +31,7 @@ function Input() {
 	    var code = event.which || event.charCode || event.keyCode;
 	    var mapKey = '' + code;
 
-	    this.keyDownState_[mapKey] = false;
+	    self.keyDownState_[mapKey] = false;
 	});
 }
 
@@ -59,8 +60,8 @@ Input.prototype.update = function() {
 		if (!this.keyDownState_.hasOwnProperty(key)) {
 			continue;
 		}
-		if (this.keyDownState_[key] && this.keyHitBindings_[key]) {
-	    	var bindings = this.keyHitBindings_[key];
+		if (this.keyDownState_[key] && this.keyDownBindings_[key]) {
+	    	var bindings = this.keyDownBindings_[key];
 	    	for (var i = 0; i < bindings.length; i++) {
 	    		bindings[i].action.fire(this, bindings[i].data);
 	    	}
@@ -78,10 +79,10 @@ Input.prototype.bindMapKeyToAction_ = function(mapKey, map, action, data) {
 
 
 Input.prototype.bindKeyHitAction = function(key, action, data) {
-	bindMapKeyToAction_(key, this.keyHitBindings_, action, data);
+	this.bindMapKeyToAction_(key, this.keyHitBindings_, action, data);
 };
 
 
 Input.prototype.bindKeyDownAction = function(key, action, data) {
-	bindMapKeyToAction_(key, this.keyDownBindings_, action, data);
+	this.bindMapKeyToAction_(key, this.keyDownBindings_, action, data);
 };

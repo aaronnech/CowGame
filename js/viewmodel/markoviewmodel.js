@@ -59,21 +59,21 @@ MarkoViewModel.prototype.update = function() {
 };
 
 
-MarkoViewModel.panCameraLeft = function() {
+MarkoViewModel.prototype.panCameraLeft = function() {
 	this.camera_.panLeft();
 };
 
 
-MarkoViewModel.panCameraRight = function() {
+MarkoViewModel.prototype.panCameraRight = function() {
 	this.camera_.panRight();
 };
 
 
-MarkoViewModel.panCameraUp = function() {
+MarkoViewModel.prototype.panCameraUp = function() {
 	this.camera_.panUp();
 };
 
 
-MarkoViewModel.panCameraDown = function() {
+MarkoViewModel.prototype.panCameraDown = function() {
 	this.camera_.panDown();
 };

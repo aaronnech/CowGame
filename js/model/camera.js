@@ -8,6 +8,30 @@ function Camera() {
 window.inherits(Camera, Model);
 
 
+// In pixels per frame
+Camera.PAN_SPEED = 2;
+
+
+Camera.prototype.panUp = function() {
+	this.moveY(-Camera.PAN_SPEED);
+};
+
+
+Camera.prototype.panDown = function() {
+	this.moveY(Camera.PAN_SPEED);
+};
+
+
+Camera.prototype.panLeft = function() {
+	this.moveX(Camera.PAN_SPEED);
+};
+
+
+Camera.prototype.panRight = function() {
+	this.moveX(-Camera.PAN_SPEED);
+};
+
+
 Camera.prototype.getX = function() {
 	return this.x_;
 };
