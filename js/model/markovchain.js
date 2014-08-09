@@ -39,8 +39,6 @@ MarkovChain.prototype.getNeighborStates = function(state) {
 
 MarkovChain.prototype.getNeighborProbabilities = function(state) {
     var index = this.stateToIndex_[state];
-    console.log(index);
-    console.log(this.transitionMatrix_[index].length);
     var result = [];
     for (var i = 0; i < this.transitionMatrix_[index].length; i++) {
         result.push(this.transitionMatrix_[index][i]);
