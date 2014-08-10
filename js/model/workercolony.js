@@ -25,4 +25,4 @@ WorkerColony.prototype.update = function() {
 	for (var i = 0; i < this.workersArray_.length; i++) {
 		this.workersArray_[i].update(this.workers_);
 	}
-}
+};
