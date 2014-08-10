@@ -13,6 +13,10 @@ function MarkovChain(states) {
         /* Assign the state and index in the matrix */
         this.stateToIndex_[states[i]] = i;
         this.indexToState_[i] = states[i];
+
+        for (var j = 0; j < states.length; j++) {
+            this.transitionMatrix_[i][j] = 0.0;
+        }
     }
 };
 
@@ -24,17 +28,17 @@ MarkovChain.prototype.getProbability = function(tailState, headState) {
     return this.transitionMatrix_[this.stateToIndex_[tailState]][this.stateToIndex_[headState]];
 };
 
-MarkovChain.prototype.getNeighborStates = function(state) {
+MarkovChain.prototype.getNeighborProbabilities = function(state) {
     var index = this.stateToIndex_[state];
-    var result = {"states" : []};
-    for (var i = 0; i < this.transitionMatrix_.length[index]; i++) {
-        result.states.push({"state" : this.indexToState_[i], "probability" : this.transitionMatrix_[index][i]});
+    var result = [];
+    for (var i = 0; i < this.transitionMatrix_[index].length; i++) {
+        result.push(this.transitionMatrix_[index][i]);
     }
     return result;
 };
 
-MarkovChain.prototype.switchToState = function(state) {
-    this.currentStateIndex_ = this.indexToState_(state);
+MarkovChain.prototype.setCurrentState = function(state) {
+    this.currentStateIndex_ = this.stateToIndex_[state];
 };
 
 MarkovChain.prototype.getCurrentState = function() {
@@ -42,7 +46,7 @@ MarkovChain.prototype.getCurrentState = function() {
 }
 
 MarkovChain.prototype.update = function() {
-    var probabilites = this.getNeighborStates(this.indexToState_(this.currentStateIndex_));
+    var probabilities = this.getNeighborProbabilities(this.indexToState_[this.currentStateIndex_]);
     for (var i = 1; i < probabilities.length; i++) {
         probabilities[i] += probabilities[i - 1];
     }
