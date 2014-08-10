@@ -17,8 +17,6 @@ function MarkoViewModel() {
 		MarkoViewModel.DISPLAY_WIDTH,
 		MarkoViewModel.DISPLAY_HEIGHT);
 	this.cameraView_ = new CameraView(this.camera_, this.pixiStage_, this.pixiWorld_);
-	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);
-	this.camera_.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
 	var cameraContainer = this.cameraView_.getPixiStageMember();
 
 	// Map
@@ -50,6 +48,10 @@ function MarkoViewModel() {
 		Input.KEYS.RIGHT, Action.ViewActions.PAN_RIGHT);
 	this.input_.bindKeyDownAction(
 		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
+
+	// Move the camera to the starting position
+	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);
+	this.camera_.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
