@@ -4,7 +4,10 @@ function Worker() {
 
 	this.x_ = 0;
 	this.y_ = 0;
-	this.states_ = [];
+	this.canUpdateState_ = false;
+	this.walkTimer_ = 0;
+
+	this.states_ = {};
 	for (var key in WorkerState.Types) {
 		this.states_[key] = new WorkerState(key, null);
 	}
@@ -12,9 +15,55 @@ function Worker() {
 }
 window.inherits(Worker, Model);
 
+Worker.SPEED = 0.1;
 
 Worker.prototype.update = function(workers) {
 	this.updateMarkovChain(workers.getAll(this.x_, this.y_));
+	this.doStateAction();
+	if (this.canUpdateState_) {
+		this.stateManager_.update();
+		this.onStateChange();
+	}
+};
+
+
+Worker.prototype.onStateChange = function() {
+	var state =
+		this.states_[this.stateManager_.getCurrentState()];
+	var data = state.getData();
+	var type = state.getType();
+
+	if (data) {
+		switch (type) {
+			case WorkerState.Types.MOVE_TO:
+				// Calculate path here
+				data.iterator = PathGenerator.instance.makePath(
+					this.x_, this.y_, data.x, data.y);
+				state.setData(data);
+				break;
+		}
+	}
+};
+
+
+Worker.prototype.doStateAction = function() {
+	var state =
+		this.states_[this.stateManager_.getCurrentState()];
+	var data = state.getData();
+	var type = state.getType();
+
+	if (data) {
+		switch (type) {
+			case WorkerState.Types.MOVE_TO:
+				this.moveTowards(data.iterator);
+				break;
+		}
+	}
+};
+
+
+Worker.moveTowards = function(pathIterator) {
+	this.walkTimer_ += Worker.SPEED;
 };
 
 
