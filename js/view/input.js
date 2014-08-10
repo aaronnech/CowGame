@@ -36,7 +36,7 @@ function Input() {
 }
 
 
-Input.KEYS = {
+Input.Keys = {
 	RIGHT : '39',
 	LEFT : '37',
 	UP : '38',

@@ -2,6 +2,9 @@ function MarkoViewModel() {
 	this.base = ViewModel;
 	this.base.apply(this);
 
+	// Input processor
+	this.input_ = new Input();
+
 	// Setup renderer
 	this.pixiStage_ = new PIXI.Stage(0x339933);
 	this.pixiRenderer_ = PIXI.autoDetectRenderer(
@@ -27,6 +30,9 @@ function MarkoViewModel() {
 	    MarkoViewModel.TILE_WIDTH);
 	this.mapView_ = new MapView(this.map_, this.camera_, this.pixiWorld_);
 
+	// Create select handler
+	this.selector_ = new Selector(this.input_);
+
 	// Place a colony down (test for now)
 	this.colony_ = new WorkerColony(this.map_);
 	for (var i = 0; i < 100; i++) {
@@ -35,19 +41,15 @@ function MarkoViewModel() {
 		this.colony_.addWorker(worker);
 	}
 
-	// Input processor
-	// and input action bindings
-	this.input_ = new Input();
-
 	// Camera panning
 	this.input_.bindKeyDownAction(
-		Input.KEYS.UP, Action.ViewActions.PAN_UP);
+		Input.Keys.UP, Action.ViewActions.PAN_UP);
 	this.input_.bindKeyDownAction(
-		Input.KEYS.DOWN, Action.ViewActions.PAN_DOWN);
+		Input.Keys.DOWN, Action.ViewActions.PAN_DOWN);
 	this.input_.bindKeyDownAction(
-		Input.KEYS.RIGHT, Action.ViewActions.PAN_RIGHT);
+		Input.Keys.RIGHT, Action.ViewActions.PAN_RIGHT);
 	this.input_.bindKeyDownAction(
-		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
+		Input.Keys.LEFT, Action.ViewActions.PAN_LEFT);
 
 	// Move the camera to the starting position
 	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);

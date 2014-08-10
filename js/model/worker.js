@@ -9,6 +9,15 @@ function Worker() {
 }
 window.inherits(Worker, Model);
 
+Worker.prototype.getWidth = function() {
+	return 1;
+};
+
+
+Worker.prototype.getHeight = function() {
+	return 1;
+};
+
 
 Worker.prototype.getX = function() {
 	return this.x_;
@@ -18,6 +27,7 @@ Worker.prototype.getX = function() {
 Worker.prototype.getY = function() {
 	return this.y_;
 };
+
 
 Worker.prototype.setX = function(x) {
 	this.x_ = x;
