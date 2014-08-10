@@ -8,11 +8,11 @@ function WorkerView(workerModel, cameraModel, pixiStage) {
 window.inherits(WorkerView, PixiView);
 
 WorkerView.prototype.makePixiStageMember = function() {
-	var graphics = new PIXI.Graphics();
 	var worker = this.getModel();
 	var x = worker.getX() * MarkoViewModel.TILE_WIDTH;
 	var y = worker.getY() * MarkoViewModel.TILE_HEIGHT;
 	if (this.camera_.inView(x, y)) {
+		var graphics = new PIXI.Graphics();
 		graphics.beginFill(0xFFFFFF);
 		graphics.drawRect(
 			x,

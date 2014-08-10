@@ -1,8 +1,6 @@
 function Game() {
 	this.running_ = false;
 
-	this.loopInterval_ = null;
-
 	this.oneFrameTime_ = null;
 
 	this.lastUpdate_ = null;
@@ -32,7 +30,7 @@ Game.prototype.update_ = function(delta) {
 
 Game.prototype.run = function(fps) {
 	var self = this;
-	var loop = function() {
+	function loop() {
 		var delta = 1;
 		if (self.lastUpdate_) {
 		    var now = Date.now();
@@ -43,15 +41,18 @@ Game.prototype.run = function(fps) {
 		}
 
 		if (!self.running_) {
-			clearInterval(self.loopInterval_);
 			self.onShutDown();
+		} else {
+			setTimeout(function() {
+			    requestAnimationFrame(loop);
+				self.update_(delta);
+				self.render_();
+			}, self.oneFrameTime_);			
 		}
-		self.update_(delta);
-		self.render_();
 	};
 
 	this.oneFrameTime_ = 1000 / fps;
 	this.running_ = true;
 	this.onStart();
-	this.loopInterval_ = setInterval(loop, this.oneFrameTime_);
+	loop();
 };
