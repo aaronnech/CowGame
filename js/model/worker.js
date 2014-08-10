@@ -67,13 +67,8 @@ Worker.prototype.updateMarkovChain = function(neighbors) {
 
 			var current = this.stateManager_.getProbability(tail, head);
 			average = (average + current) / (neighbors.length + 1.0);
-			var delta = (current + average > 1) ? (1 - current) : (average);
-
-			current += delta;
-			if (current > 1) {
-				delta = delta - (current - 1);
-				current = 1;
-			}
+			var delta = average - current;
+			current = average;
 
 			this.stateManager_.setProbability(tail, head, current);
 
