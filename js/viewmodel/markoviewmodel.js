@@ -34,7 +34,7 @@ function MarkoViewModel() {
 	for (var i = 0; i < 100; i++) {
 		var worker = new Worker();
 		var workerView = new WorkerView(worker, this.camera_, this.pixiWorld_);
-		this.colony_.add(worker);
+		this.colony_.addWorker(worker);
 	}
 
 	// Input processor
