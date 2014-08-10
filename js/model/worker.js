@@ -13,6 +13,11 @@ function Worker() {
 window.inherits(Worker, Model);
 
 
+Worker.prototype.update = function(workers) {
+	this.updateMarkovChain(workers.getAll(this.x_, this.y_));
+};
+
+
 Worker.prototype.getWidth = function() {
 	return 1;
 };
