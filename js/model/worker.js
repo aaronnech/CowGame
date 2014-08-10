@@ -59,19 +59,22 @@ Worker.prototype.getMarkovChain = function() {
 Worker.prototype.updateMarkovChain = function(neighbors) {
 	for (var tail in WorkerState.Types) {
 		for (var head in WorkerState.Types) {
+			// Calculate an average probability matrix
 			var average = 0.0;
 			for (var i = 0; i < neighbors.length; i++) {
 				neighbor = neighbors[i];
 				average += neighbor.getMarkovChain().getProbability(tail, head);
 			}
 
+			// Set the current probability to the average, and calculate
+			// the delta needed to make this change.
 			var current = this.stateManager_.getProbability(tail, head);
 			average = (average + current) / (neighbors.length + 1.0);
 			var delta = average - current;
-			current = average;
+			this.stateManager_.setProbability(tail, head, average);
 
-			this.stateManager_.setProbability(tail, head, current);
-
+			// Calculate the sum of all the other probabilities besides
+			// the one we set
 			var sum = 0.0;
 			for (var other in WorkerState.Types) {
 				if (other != tail) {
@@ -79,6 +82,12 @@ Worker.prototype.updateMarkovChain = function(neighbors) {
 				}
 			}
 
+			// Calculate a contribution (defined as how much
+			// of a percentage of the total probability each takes up)
+			// and multiply the delta by this contribution.
+			// The product of this contribution and the delta will be added to the probability
+			// such that the entire delta is distributed across the other probabilities
+			// and it still adds up to 1.
 			for (var other in WorkerState.Types) {
 				if (other != tail) {
 					var currentProbability = this.stateManager_.getProbability(tail, other);
