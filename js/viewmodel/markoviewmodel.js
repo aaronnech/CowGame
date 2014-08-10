@@ -1,34 +1,36 @@
 function MarkoViewModel() {
-	var WORLD_WIDTH = 800;
-	var WORLD_HEIGHT = 600;
-	var NUMBER_OF_X_TILES = 40;
-	var NUMBER_OF_Y_TILES = 30;
-	var TILE_HEIGHT = Math.floor(WORLD_HEIGHT / NUMBER_OF_Y_TILES);
-	var TILE_WIDTH = Math.floor(WORLD_WIDTH / NUMBER_OF_X_TILES);
-
 	this.base = ViewModel;
 	this.base.apply(this);
 
 	// Setup renderer
-	this.pixiStage_ = new PIXI.Stage(0x66FF99);
-	this.pixiRenderer_ = PIXI.autoDetectRenderer(WORLD_WIDTH, WORLD_HEIGHT);
+	this.pixiStage_ = new PIXI.Stage(0x339933);
+	this.pixiRenderer_ = PIXI.autoDetectRenderer(
+		MarkoViewModel.DISPLAY_WIDTH, MarkoViewModel.DISPLAY_HEIGHT);
 	this.pixiWorld_ = new PIXI.DisplayObjectContainer();
 	this.pixiStage_.addChild(this.pixiWorld_);
 	document.body.appendChild(this.pixiRenderer_.view);
 
 	// Camera
-	this.camera_ = new Camera();
+	this.camera_ = new Camera(
+		MarkoViewModel.WORLD_WIDTH,
+		MarkoViewModel.WORLD_HEIGHT,
+		MarkoViewModel.DISPLAY_WIDTH,
+		MarkoViewModel.DISPLAY_HEIGHT);
 	this.cameraView_ = new CameraView(this.camera_, this.pixiStage_, this.pixiWorld_);
+	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);
+	this.camera_.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
 	var cameraContainer = this.cameraView_.getPixiStageMember();
 
 	// Map
 	this.map_ = new Map(
-		NUMBER_OF_X_TILES,
-		NUMBER_OF_Y_TILES,
-		TILE_HEIGHT,
-	    TILE_WIDTH);
-	this.mapView_ = new MapView(this.map_, this.pixiWorld_);
+		MarkoViewModel.NUMBER_OF_X_TILES,
+		MarkoViewModel.NUMBER_OF_Y_TILES,
+		MarkoViewModel.TILE_HEIGHT,
+	    MarkoViewModel.TILE_WIDTH);
+	this.mapView_ = new MapView(this.map_, this.camera_, this.pixiWorld_);
 
+	// Colonies
+	this.colonies_ = new ColoniesView(this.map_, this.camera_, this.pixiWorld_);
 
 	// Input processor
 	// and input action bindings
@@ -45,6 +47,18 @@ function MarkoViewModel() {
 		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
+
+MarkoViewModel.DISPLAY_WIDTH = 800;
+MarkoViewModel.DISPLAY_HEIGHT = 600;
+MarkoViewModel.WORLD_WIDTH = 8000;
+MarkoViewModel.WORLD_HEIGHT = 6000;
+MarkoViewModel.TILE_HEIGHT = 16;
+MarkoViewModel.TILE_WIDTH = 16;
+MarkoViewModel.NUMBER_OF_X_TILES =
+	MarkoViewModel.WORLD_WIDTH / MarkoViewModel.TILE_WIDTH;
+MarkoViewModel.NUMBER_OF_Y_TILES =
+	MarkoViewModel.WORLD_HEIGHT / MarkoViewModel.TILE_HEIGHT;
+
 
 MarkoViewModel.prototype.render = function() {
 	// Render the pixi stage

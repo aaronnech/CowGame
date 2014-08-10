@@ -5,8 +5,9 @@ function PixiView(model, pixiStage) {
 	this.pixiStage_ = pixiStage;
 
 	this.pixiChild_ = this.makePixiStageMember();
-
-	this.pixiStage_.addChild(this.pixiChild_);
+	if (this.pixiChild_) {
+		this.pixiStage_.addChild(this.pixiChild_);
+	}
 }
 
 
@@ -21,9 +22,14 @@ PixiView.prototype.getPixiStageMember = function() {
 
 
 PixiView.prototype.redrawPixiStageMember = function() {
-	this.pixiStage_.removeChild(this.pixiChild_);
-	this.pixiChild_ = this.makePixiStageMember();
-	this.pixiStage_.addChild(this.pixiChild_);
+	var temp = this.makePixiStageMember();
+	if (temp) {
+		if (this.pixiChild_) {
+			this.pixiStage_.removeChild(this.pixiChild_);
+		}
+		this.pixiChild_ = temp;
+		this.pixiStage_.addChild(this.pixiChild_);
+	}
 };
 
 

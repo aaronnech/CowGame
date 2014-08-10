@@ -1,4 +1,7 @@
-function WorkerView(workerModel, pixiStage) {
+function WorkerView(workerModel, cameraModel, pixiStage) {
+	this.camera_ = cameraModel;
+	this.camera_.subscribeView(this);
+
 	this.base = PixiView;
 	this.base.apply(this, [workerModel, pixiStage]);
 }
@@ -6,12 +9,20 @@ window.inherits(WorkerView, PixiView);
 
 WorkerView.prototype.makePixiStageMember = function() {
 	var graphics = new PIXI.Graphics();
-
-	graphics.beginFill(0xFFFF00);
-	graphics.lineStyle(5, 0xFF0000);
-	graphics.drawRect(0, 0, 300, 200);
-
-	return graphics;
+	var worker = this.getModel();
+	var x = worker.getX() * MarkoViewModel.TILE_WIDTH;
+	var y = worker.getY() * MarkoViewModel.TILE_HEIGHT;
+	if (this.camera_.inView(x, y)) {
+		graphics.beginFill(0xFFFFFF);
+		graphics.drawRect(
+			x,
+			y,
+			MarkoViewModel.TILE_WIDTH,
+			MarkoViewModel.TILE_HEIGHT);
+		graphics.endFill();
+		return graphics;
+	}
+	return null;
 };
 
 

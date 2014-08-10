@@ -113,27 +113,39 @@ Controller.prototype.clearBindings = function(action) {
 };
 
 
-Controller.prototype.setBindings = window.ABSTRACT_METHOD;function Camera() {
+Controller.prototype.setBindings = window.ABSTRACT_METHOD;function Camera(worldWidth, worldHeight, width, height) {
 	this.base = Model;
 	this.base.apply(this);
 
 	this.x_ = 0;
 	this.y_ = 0;
+	this.width_ = width;
+	this.height_ = height;
+	this.worldWidth_ = worldWidth;
+	this.worldHeight_ = worldHeight;
 }
 window.inherits(Camera, Model);
 
 
 // In pixels per frame
-Camera.PAN_SPEED = 2;
+Camera.PAN_SPEED = 5;
+
+
+Camera.prototype.inView = function(x, y) {
+	return x >= this.x_ &&
+		y >= this.y_ &&
+		x <= this.x_ + this.width_ &&
+		y <= this.y_ + this.height_;
+};
 
 
 Camera.prototype.panUp = function() {
-	this.moveY(Camera.PAN_SPEED);
+	this.moveY(-Camera.PAN_SPEED);
 };
 
 
 Camera.prototype.panDown = function() {
-	this.moveY(-Camera.PAN_SPEED);
+	this.moveY(Camera.PAN_SPEED);
 };
 
 
@@ -146,7 +158,6 @@ Camera.prototype.panRight = function() {
 	this.moveX(Camera.PAN_SPEED);
 };
 
-
 Camera.prototype.getX = function() {
 	return this.x_;
 };
@@ -157,22 +168,49 @@ Camera.prototype.getY = function() {
 };
 
 
+Camera.prototype.getWidth = function() {
+	return this.width_;
+};
+
+
+Camera.prototype.getHeight = function() {
+	return this.height_;
+};
+
+
 Camera.prototype.moveX = function(x) {
-	this.x_ -= x;
+	var newX = this.x_ + x;
+	if (newX < 0) {
+		this.x_ = 0;
+	} else if (newX - this.width_ > this.worldWidth_) {
+		this.x_ = this.worldWidth_ - this.width_;
+	} else {
+		this.x_ = newX;
+	}
 	this.notifyChange();
 };
 
 
 Camera.prototype.moveY = function(y) {
-	this.y_ -= y;
+	var newY = this.y_ + y;
+	if (newY < 0) {
+		this.y_ = 0;
+	} else if (newY - this.height_ > this.worldHeight_) {
+		this.y_ = this.worldHeight_ - this.height_;
+	} else {
+		this.y_ = newY;
+	}
 	this.notifyChange();
 };function Map(width, height, tileWidth, tileHeight) {
 	this.base = Model;
 	this.base.apply(this);
 
+	this.tileWidth_ = tileWidth;
+	this.tileHeight_ = tileHeight;
 	this.width_ = width;
 	this.height_ = height;
 	this.tiles_ = [];
+
 	for (var y = 0; y < this.height_; y++) {
 		for (var x = 0; x < this.width_; x++) {
 			this.tiles_[this.toLinearIndex_(x, y)] =
@@ -196,7 +234,27 @@ Map.prototype.getHeight = function() {
 Map.prototype.forEachTile = function(f) {
 	for (var y = 0; y < this.height_; y++) {
 		for (var x = 0; x < this.width_; x++) {
-			f(this.getTile(x, y), x, y);
+			var tile = this.getTile(x, y);
+			if (tile) {
+				f(tile, x, y);
+			}
+		}
+	}
+};
+
+
+Map.prototype.forEachTileInRect = function(x, y, w, h, f) {
+	var startX = this.toTileX_(x);
+	var endX = this.toTileX_(w) + startX;
+	var startY = this.toTileX_(y);
+	var endY = this.toTileX_(h) + startY + 1;
+
+	for (var y = startY; y <= endY; y++) {
+		for (var x = startX; x <= endX; x++) {
+			var tile = this.getTile(x, y);
+			if (tile) {
+				f(tile, x, y);
+			}
 		}
 	}
 };
@@ -207,8 +265,28 @@ Map.prototype.isInMap = function(x, y) {
 };
 
 
+Map.prototype.toTileX_ = function(x) {
+	return Math.floor(x / this.tileWidth_);
+};
+
+
+Map.prototype.toTileY_ = function(x) {
+	return Math.floor(y / this.tileHeight_);
+};
+
+
+Map.prototype.randomTileX = function() {
+	return Math.floor(Math.random() * this.width_);
+};
+
+
+Map.prototype.randomTileY = function() {
+	return Math.floor(Math.random() * this.height_);
+};
+
+
 Map.prototype.toLinearIndex_ = function(x, y) {
-	return y * this._width + x;
+	return Math.floor(y * this.width_ + x);
 };
 
 
@@ -294,7 +372,7 @@ Model.prototype.notifyChange = function() {
 	}
 };function Tile(width, height) {
 	this.isOccupied_ = false;
-	this.color_ = 0x444444;
+	this.color_ = Math.random() > 0.5 ? null : 0x33AA33;
 	this.width_ = width;
 	this.height_ = height;
 };
@@ -316,6 +394,24 @@ Tile.prototype.getColor = function() {
 
 Tile.prototype.isOccupied = function() {
 	return this.isOccupied_;
+};function Worker(x, y) {
+	this.base = Model;
+	this.base.apply(this);
+
+	this.x_ = x;
+	this.y_ = y;
+	this.stateManager_ = null;
+}
+window.inherits(Worker, Model);
+
+
+Worker.prototype.getX = function() {
+	return this.x_;
+};
+
+
+Worker.prototype.getY = function() {
+	return this.y_;
 };/**
  * @license
  * pixi.js - v1.6.0
@@ -347,8 +443,23 @@ CameraView.prototype.makePixiStageMember = function() {
 
 CameraView.prototype.notify = function() {
 	var camera = this.getModel();
-	this.world_.position.x = camera.getX();
-	this.world_.position.y = camera.getY();
+	this.world_.position.x = -camera.getX();
+	this.world_.position.y = -camera.getY();
+};function ColoniesView(mapModel, cameraModel, pixiStage) {
+	this.map_ = mapModel;
+	this.workerViews_ = [];
+	for (var i = 0; i < 200; i++) {
+		this.addWorker(cameraModel, pixiStage);
+	}
+}
+
+ColoniesView.prototype.addWorker = function(cameraModel, pixiStage) {
+	var randomX = this.map_.randomTileX();
+	var randomY = this.map_.randomTileY();
+	var model = new Worker(
+		randomX,
+		randomY);
+	this.workerViews_.push(new WorkerView(model, cameraModel, pixiStage));
 };function Input() {
 	var self = this;
 	this.keyHitBindings_ = {};
@@ -436,7 +547,10 @@ Input.prototype.bindKeyHitAction = function(key, action, data) {
 
 Input.prototype.bindKeyDownAction = function(key, action, data) {
 	this.bindMapKeyToAction_(key, this.keyDownBindings_, action, data);
-};function MapView(mapModel, pixiStage) {
+};function MapView(mapModel, cameraModel, pixiStage) {
+	this.camera_ = cameraModel;
+	this.camera_.subscribeView(this);
+
 	this.base = PixiView;
 	this.base.apply(this, [mapModel, pixiStage]);
 }
@@ -445,11 +559,19 @@ window.inherits(MapView, PixiView);
 MapView.prototype.makePixiStageMember = function() {
 	var graphics = new PIXI.Graphics();
 	var map = this.getModel();
-	map.forEachTile(function(tile, x, y) {
-		var width = tile.getWidth();
-		var height = tile.getHeight();
-		graphics.beginFill(tile.getColor());
-		graphics.drawRect(x * width, y * height, width - 1, height - 1);
+	var camX = this.camera_.getX();
+	var camY = this.camera_.getY();
+	var camW = this.camera_.getWidth();
+	var camH = this.camera_.getHeight();
+
+	map.forEachTileInRect(camX, camY, camW, camH, function(tile, x, y) {
+		if (tile.getColor()) {
+			var width = tile.getWidth();
+			var height = tile.getHeight();
+			graphics.beginFill(tile.getColor());
+			graphics.drawRect(x * width, y * height, width, height);
+			graphics.endFill();
+		}
 	});
 
 	return graphics;
@@ -457,7 +579,7 @@ MapView.prototype.makePixiStageMember = function() {
 
 
 MapView.prototype.notify = function() {
-
+	this.redrawPixiStageMember();
 };function PixiView(model, pixiStage) {
 	this.model_ = model;
 	this.model_.subscribeView(this);
@@ -465,8 +587,9 @@ MapView.prototype.notify = function() {
 	this.pixiStage_ = pixiStage;
 
 	this.pixiChild_ = this.makePixiStageMember();
-
-	this.pixiStage_.addChild(this.pixiChild_);
+	if (this.pixiChild_) {
+		this.pixiStage_.addChild(this.pixiChild_);
+	}
 }
 
 
@@ -481,16 +604,24 @@ PixiView.prototype.getPixiStageMember = function() {
 
 
 PixiView.prototype.redrawPixiStageMember = function() {
-	this.pixiStage_.removeChild(this.pixiChild_);
-	this.pixiChild_ = this.makePixiStageMember();
-	this.pixiStage_.addChild(this.pixiChild_);
+	var temp = this.makePixiStageMember();
+	if (temp) {
+		if (this.pixiChild_) {
+			this.pixiStage_.removeChild(this.pixiChild_);
+		}
+		this.pixiChild_ = temp;
+		this.pixiStage_.addChild(this.pixiChild_);
+	}
 };
 
 
 PixiView.prototype.makePixiStageMember = window.ABSTRACT_METHOD;
 
 
-PixiView.prototype.notify = window.ABSTRACT_METHOD;function WorkerView(workerModel, pixiStage) {
+PixiView.prototype.notify = window.ABSTRACT_METHOD;function WorkerView(workerModel, cameraModel, pixiStage) {
+	this.camera_ = cameraModel;
+	this.camera_.subscribeView(this);
+
 	this.base = PixiView;
 	this.base.apply(this, [workerModel, pixiStage]);
 }
@@ -498,48 +629,58 @@ window.inherits(WorkerView, PixiView);
 
 WorkerView.prototype.makePixiStageMember = function() {
 	var graphics = new PIXI.Graphics();
-
-	graphics.beginFill(0xFFFF00);
-	graphics.lineStyle(5, 0xFF0000);
-	graphics.drawRect(0, 0, 300, 200);
-
-	return graphics;
+	var worker = this.getModel();
+	var x = worker.getX() * MarkoViewModel.TILE_WIDTH;
+	var y = worker.getY() * MarkoViewModel.TILE_HEIGHT;
+	if (this.camera_.inView(x, y)) {
+		graphics.beginFill(0xFFFFFF);
+		graphics.drawRect(
+			x,
+			y,
+			MarkoViewModel.TILE_WIDTH,
+			MarkoViewModel.TILE_HEIGHT);
+		graphics.endFill();
+		return graphics;
+	}
+	return null;
 };
 
 
 WorkerView.prototype.notify = function() {
 	this.redrawPixiStageMember();
 };function MarkoViewModel() {
-	var WORLD_WIDTH = 800;
-	var WORLD_HEIGHT = 600;
-	var NUMBER_OF_X_TILES = 40;
-	var NUMBER_OF_Y_TILES = 30;
-	var TILE_HEIGHT = Math.floor(WORLD_HEIGHT / NUMBER_OF_Y_TILES);
-	var TILE_WIDTH = Math.floor(WORLD_WIDTH / NUMBER_OF_X_TILES);
-
 	this.base = ViewModel;
 	this.base.apply(this);
 
 	// Setup renderer
-	this.pixiStage_ = new PIXI.Stage(0x66FF99);
-	this.pixiRenderer_ = PIXI.autoDetectRenderer(WORLD_WIDTH, WORLD_HEIGHT);
+	this.pixiStage_ = new PIXI.Stage(0x339933);
+	this.pixiRenderer_ = PIXI.autoDetectRenderer(
+		MarkoViewModel.DISPLAY_WIDTH, MarkoViewModel.DISPLAY_HEIGHT);
 	this.pixiWorld_ = new PIXI.DisplayObjectContainer();
 	this.pixiStage_.addChild(this.pixiWorld_);
 	document.body.appendChild(this.pixiRenderer_.view);
 
 	// Camera
-	this.camera_ = new Camera();
+	this.camera_ = new Camera(
+		MarkoViewModel.WORLD_WIDTH,
+		MarkoViewModel.WORLD_HEIGHT,
+		MarkoViewModel.DISPLAY_WIDTH,
+		MarkoViewModel.DISPLAY_HEIGHT);
 	this.cameraView_ = new CameraView(this.camera_, this.pixiStage_, this.pixiWorld_);
+	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);
+	this.camera_.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
 	var cameraContainer = this.cameraView_.getPixiStageMember();
 
 	// Map
 	this.map_ = new Map(
-		NUMBER_OF_X_TILES,
-		NUMBER_OF_Y_TILES,
-		TILE_HEIGHT,
-	    TILE_WIDTH);
-	this.mapView_ = new MapView(this.map_, this.pixiWorld_);
+		MarkoViewModel.NUMBER_OF_X_TILES,
+		MarkoViewModel.NUMBER_OF_Y_TILES,
+		MarkoViewModel.TILE_HEIGHT,
+	    MarkoViewModel.TILE_WIDTH);
+	this.mapView_ = new MapView(this.map_, this.camera_, this.pixiWorld_);
 
+	// Colonies
+	this.colonies_ = new ColoniesView(this.map_, this.camera_, this.pixiWorld_);
 
 	// Input processor
 	// and input action bindings
@@ -556,6 +697,18 @@ WorkerView.prototype.notify = function() {
 		Input.KEYS.LEFT, Action.ViewActions.PAN_LEFT);
 }
 MarkoViewModel.prototype = Object.create(ViewModel.prototype);
+
+MarkoViewModel.DISPLAY_WIDTH = 800;
+MarkoViewModel.DISPLAY_HEIGHT = 600;
+MarkoViewModel.WORLD_WIDTH = 8000;
+MarkoViewModel.WORLD_HEIGHT = 6000;
+MarkoViewModel.TILE_HEIGHT = 16;
+MarkoViewModel.TILE_WIDTH = 16;
+MarkoViewModel.NUMBER_OF_X_TILES =
+	MarkoViewModel.WORLD_WIDTH / MarkoViewModel.TILE_WIDTH;
+MarkoViewModel.NUMBER_OF_Y_TILES =
+	MarkoViewModel.WORLD_HEIGHT / MarkoViewModel.TILE_HEIGHT;
+
 
 MarkoViewModel.prototype.render = function() {
 	// Render the pixi stage

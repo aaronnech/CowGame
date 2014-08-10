@@ -1,6 +1,6 @@
 function Tile(width, height) {
 	this.isOccupied_ = false;
-	this.color_ = 0x444444;
+	this.color_ = Math.random() > 0.5 ? null : 0x33AA33;
 	this.width_ = width;
 	this.height_ = height;
 };

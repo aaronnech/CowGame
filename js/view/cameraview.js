@@ -13,6 +13,6 @@ CameraView.prototype.makePixiStageMember = function() {
 
 CameraView.prototype.notify = function() {
 	var camera = this.getModel();
-	this.world_.position.x = camera.getX();
-	this.world_.position.y = camera.getY();
+	this.world_.position.x = -camera.getX();
+	this.world_.position.y = -camera.getY();
 };
