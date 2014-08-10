@@ -43,7 +43,7 @@ MarkovChain.prototype.setCurrentState = function(state) {
 
 MarkovChain.prototype.getCurrentState = function() {
     return this.indexToState_(this.currentStateIndex_);
-}
+};
 
 MarkovChain.prototype.update = function() {
     var probabilities = this.getNeighborProbabilities(this.indexToState_[this.currentStateIndex_]);
@@ -58,7 +58,15 @@ MarkovChain.prototype.update = function() {
             return this.indexToState_[i];
         }
     }
-}
+};
+
+MarkovChain.prototype.updateTransitionMatrix = function(transitionMatrix) {
+    // Update this chain based on the input matrix
+};
+
+MarkovChain.prototype.getTransitionMatrix = function() {
+    return this.transitionMatrix_;
+};
 
 MarkovChain.PossibleStates = {
     // ...
