@@ -29,8 +29,13 @@ function MarkoViewModel() {
 	    MarkoViewModel.TILE_WIDTH);
 	this.mapView_ = new MapView(this.map_, this.camera_, this.pixiWorld_);
 
-	// Colonies
-	this.colonies_ = new ColoniesView(this.map_, this.camera_, this.pixiWorld_);
+	// Place a colony down (test for now)
+	this.colony_ = new WorkerColony(this.map_);
+	for (var i = 0; i < 100; i++) {
+		var worker = new Worker();
+		var workerView = new WorkerView(worker, this.camera_, this.pixiWorld_);
+		this.colony_.add(worker);
+	}
 
 	// Input processor
 	// and input action bindings
