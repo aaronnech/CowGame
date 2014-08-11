@@ -5,7 +5,7 @@ function Worker() {
 	this.x_ = 0;
 	this.y_ = 0;
 	// Markov stuff
-	this.stateManager_ = null;
+	// this.stateManager_ = new MarkovChain();
 }
 window.inherits(Worker, Model);
 
