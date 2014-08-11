@@ -65,12 +65,9 @@ Worker.prototype.updateMarkovChain = function(neighbors) {
 				average += neighbor.getMarkovChain().getProbability(tail, head);
 			}
 
-			average /= neighbors.length;
 			var current = this.stateManager_.getProbability(tail, head);
+			average = (average + current) / (neighbors.length + 1.0);
 			var delta = (current + average > 1) ? (1 - current) : (average);
-
-			console.log(current);
-			console.log(delta);
 
 			current += delta;
 			if (current > 1) {
