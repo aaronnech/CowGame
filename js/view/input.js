@@ -3,20 +3,7 @@ function Input() {
 	this.keyHitBindings_ = {};
 	this.keyDownBindings_ = {};
 	this.keyDownState_ = {};
-
-	// Listen to browser key presses
-	this.addBrowserEventListener_('keypress', function(e) {
-	    var event = e || window.event;
-	    var code = event.which || event.charCode || event.keyCode;
-	    var mapKey = '' + code;
-
-	    if (self.keyHitBindings_[mapKey]) {
-	    	var bindings = self.keyHitBindings_[mapKey];
-	    	for (var i = 0; i < bindings.length; i++) {
-	    		bindings[i].action.fire(self, bindings[i].data);
-	    	}
-	    }
-	});
+	this.keyHitState_ = {};
 
 	this.addBrowserEventListener_('keydown', function(e) {
 	    var event = e || window.event;
@@ -32,6 +19,7 @@ function Input() {
 	    var mapKey = '' + code;
 
 	    self.keyDownState_[mapKey] = false;
+	    self.keyHitState_[mapKey] = true;
 	});
 }
 
@@ -56,6 +44,7 @@ Input.prototype.addBrowserEventListener_ = function(name, callback) {
 
 
 Input.prototype.update = function() {
+	// Handle keydown events
 	for (key in this.keyDownState_) {
 		if (!this.keyDownState_.hasOwnProperty(key)) {
 			continue;
@@ -65,6 +54,22 @@ Input.prototype.update = function() {
 	    	for (var i = 0; i < bindings.length; i++) {
 	    		bindings[i].action.fire(this, bindings[i].data);
 	    	}
+		}
+	}
+
+	// Handle keyhit events
+	for (key in this.keyHitState_) {
+		if (!this.keyHitState_.hasOwnProperty(key)) {
+			continue;
+		}
+		if (this.keyHitState_[key] && this.keyHitBindings_[key]) {
+	    	var bindings = this.keyHitBindings_[key];
+	    	for (var i = 0; i < bindings.length; i++) {
+	    		bindings[i].action.fire(this, bindings[i].data);
+	    	}
+		}
+		if (this.keyHitState_[key]) {
+			this.keyHitState_[key] = false;
 		}
 	}
 };

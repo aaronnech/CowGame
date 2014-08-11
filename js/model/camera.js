@@ -67,7 +67,7 @@ Camera.prototype.moveX = function(x) {
 	var newX = this.x_ + x;
 	if (newX < 0) {
 		this.x_ = 0;
-	} else if (newX - this.width_ > this.worldWidth_) {
+	} else if (newX > this.worldWidth_ - this.width_) {
 		this.x_ = this.worldWidth_ - this.width_;
 	} else {
 		this.x_ = newX;
@@ -80,7 +80,7 @@ Camera.prototype.moveY = function(y) {
 	var newY = this.y_ + y;
 	if (newY < 0) {
 		this.y_ = 0;
-	} else if (newY - this.height_ > this.worldHeight_) {
+	} else if (newY > this.worldHeight_ - this.height_) {
 		this.y_ = this.worldHeight_ - this.height_;
 	} else {
 		this.y_ = newY;
