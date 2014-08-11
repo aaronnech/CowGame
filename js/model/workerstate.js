@@ -12,5 +12,5 @@ WorkerState.prototype.setData = function(data) {
 };
 
 WorkerState.Types = {
-    MOVE_TO : "MOVE_TO";
+    MOVE_TO : "MOVE_TO"
 };
