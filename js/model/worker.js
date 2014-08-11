@@ -60,7 +60,8 @@ Worker.prototype.updateMarkovChain = function(neighbors) {
 	for (var tail in WorkerState.Types) {
 		for (var head in WorkerState.Types) {
 			var average = 0.0;
-			for (var neighbor in neighbors) {
+			for (var i = 0; i < neighbors.length; i++) {
+				neighbor = neighbors[i];
 				average += neighbor.getMarkovChain().getProbability(tail, head);
 			}
 
