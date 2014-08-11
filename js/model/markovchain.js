@@ -60,14 +60,6 @@ MarkovChain.prototype.update = function() {
     }
 };
 
-MarkovChain.prototype.updateTransitionMatrix = function(transitionMatrix) {
-    // Update this chain based on the input matrix
-};
-
 MarkovChain.prototype.getTransitionMatrix = function() {
     return this.transitionMatrix_;
-};
-
-MarkovChain.PossibleStates = {
-    // ...
 };
