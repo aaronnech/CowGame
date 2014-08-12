@@ -40,5 +40,6 @@ Action.ViewActions = {
 	PAN_LEFT : new Action(),
 	PAN_UP : new Action(),
 	PAN_DOWN : new Action(),
+	CLICK_MAP : new Action(),
 	START_DRAG_SELECT : new Action()
 };

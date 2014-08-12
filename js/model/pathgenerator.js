@@ -13,7 +13,7 @@ function PathGenerator(mapModel) {
 
 	console.log('Building collision map..');
 	this.pathFinder_.setAcceptableTiles([0]);
-	this.pathFinder_.setIterationsPerCalculation(5000); 
+	this.pathFinder_.setIterationsPerCalculation(500); 
 	this.updateCollisionMap();
 
 	console.log('setting path generator instance');

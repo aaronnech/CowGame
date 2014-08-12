@@ -15,6 +15,7 @@ ClientController.prototype.setBindings = function() {
 	this.bind(Action.ViewActions.PAN_DOWN, this.panCameraDown);
 	this.bind(Action.ViewActions.PAN_LEFT, this.panCameraLeft);
 	this.bind(Action.ViewActions.PAN_RIGHT, this.panCameraRight);
+	this.bind(Action.ViewActions.CLICK_MAP, this.clickMap);
 };
 
 
@@ -48,11 +49,6 @@ ClientController.prototype.panCameraRight = function() {
 };
 
 
-ClientController.prototype.onDragStart = function() {
-	console.log('drag start');
-};
-
-
-ClientController.prototype.onClickScreen = function() {
-	console.log('Hello');
+ClientController.prototype.clickMap = function() {
+	this.viewModel_.clickMap();
 };

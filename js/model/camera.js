@@ -13,7 +13,7 @@ window.inherits(Camera, Model);
 
 
 // In pixels per frame
-Camera.PAN_SPEED = 5;
+Camera.PAN_SPEED = 10;
 
 
 Camera.prototype.inView = function(x, y) {

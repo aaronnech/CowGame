@@ -4,10 +4,6 @@ function MarkoViewModel() {
 
 	console.log('CREATING MARKO GAME..');
 
-	console.log('INITIALIZING INPUT..');
-	// Input processor
-	this.input_ = new Input();
-
 	console.log('SETTING UP RENDERER..');
 	// Setup renderer
 	this.pixiStage_ = new PIXI.Stage(0x339933);
@@ -16,6 +12,10 @@ function MarkoViewModel() {
 	this.pixiWorld_ = new PIXI.DisplayObjectContainer();
 	this.pixiStage_.addChild(this.pixiWorld_);
 	document.body.appendChild(this.pixiRenderer_.view);
+
+	console.log('INITIALIZING INPUT..');
+	// Input processor
+	this.input_ = new Input(this.pixiRenderer_.view);
 
 	console.log('INITALIZING CAMERA..');
 	// Camera
@@ -59,9 +59,14 @@ function MarkoViewModel() {
 
 	console.log('INITIALIZING SELECT HANDLER..');
 	// Create select handler
-	this.selector_ = new Selector(this.input_, this.colony_);
+	this.selector_ = new Selector(this.input_, this.camera_);
+	this.selector_.addSelectables(this.colony_.getWorkers());
 
 	console.log('BINDING INPUT..');
+	// Map interaction
+	this.input_.bindMouseHitAction(
+		Input.Mouse.LEFT, Action.ViewActions.CLICK_MAP);
+
 	// Camera panning
 	this.input_.bindKeyDownAction(
 		Input.Keys.UP, Action.ViewActions.PAN_UP);
@@ -103,6 +108,11 @@ MarkoViewModel.prototype.update = function() {
 	// every game loop here
 	this.input_.update();
 	this.colony_.update();
+};
+
+
+MarkoViewModel.prototype.clickMap = function() {
+	this.selector_.onClickMap();
 };
 
 
