@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SERVICE_URL=http://closure-compiler.appspot.com/compile
-DEBUG=true
+DEBUG=false
 DEBUGFILE="debug.js"
 COMPILEFILE="compiled.js"
 FILELIST="controller/*.js model/*.js util/*.js view/*.js viewmodel/*.js game/*.js"
@@ -31,30 +31,30 @@ else
 	--data compilation_level=SIMPLE_OPTIMIZATIONS |
 
 	python -c '
-	import json, sys
-	data = json.load(sys.stdin)
+import json, sys
+data = json.load(sys.stdin)
 
-	if "errors" in data:
-		print "### COMPILATION FAILED WITH ERRORS"
-		for err in data["errors"]:
-			print data["errors"]
-			file = sys.argv[int(err["file"].replace("Input_", "")) + 1]
-			print "File: %s, %d:%d" % (file, err["lineno"], err["charno"])
-			print "Error: %s" % err["error"]
-			print "Line: %s" % err["line"]
-			
-		print "\nBuild failed.\n"
+if "errors" in data:
+	print "### COMPILATION FAILED WITH ERRORS"
+	for err in data["errors"]:
+		print data["errors"]
+		file = sys.argv[int(err["file"].replace("Input_", "")) + 1]
+		print "File: %s, %d:%d" % (file, err["lineno"], err["charno"])
+		print "Error: %s" % err["error"]
+		print "Line: %s" % err["line"]
 		
-	else:
-		print "### COMPILATION COMPLETED"
-		print "Original size: %db, gziped: %db" % (data["statistics"]["originalSize"], data["statistics"]["originalGzipSize"])
-		print "Compressed size: %db, gziped: %db" % (data["statistics"]["compressedSize"], data["statistics"]["compressedGzipSize"])
-		print "Compression rate: %.2f" % (float(data["statistics"]["compressedSize"]) / int(data["statistics"]["originalSize"]))
+	print "\nBuild failed.\n"
+	
+else:
+	print "### COMPILATION COMPLETED"
+	print "Original size: %db, gziped: %db" % (data["statistics"]["originalSize"], data["statistics"]["originalGzipSize"])
+	print "Compressed size: %db, gziped: %db" % (data["statistics"]["compressedSize"], data["statistics"]["compressedGzipSize"])
+	print "Compression rate: %.2f" % (float(data["statistics"]["compressedSize"]) / int(data["statistics"]["originalSize"]))
 
-		filename = "'${COMPILEFILE}'"
-		f = open(filename, "w")
-		f.write(data["compiledCode"])
+	filename = "'${COMPILEFILE}'"
+	f = open(filename, "w")
+	f.write(data["compiledCode"])
 
-		print "\nBuild file %s created.\n" % filename
+	print "\nBuild file %s created.\n" % filename
 	' $@
 fi

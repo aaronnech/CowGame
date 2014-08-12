@@ -42,7 +42,7 @@ MarkovChain.prototype.setCurrentState = function(state) {
 };
 
 MarkovChain.prototype.getCurrentState = function() {
-    return this.indexToState_(this.currentStateIndex_);
+    return this.indexToState_[this.currentStateIndex_];
 };
 
 MarkovChain.prototype.update = function() {

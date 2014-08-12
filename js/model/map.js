@@ -14,6 +14,7 @@ function Map(width, height, tileWidth, tileHeight) {
 				new Tile(tileWidth, tileHeight);
 		}
 	}
+	console.log('map constructed with ' + this.tiles_.length + ' tiles');
 }
 window.inherits(Map, Model);
 

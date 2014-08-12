@@ -2,6 +2,8 @@ function WorkerView(workerModel, cameraModel, pixiStage) {
 	this.camera_ = cameraModel;
 	this.camera_.subscribeView(this);
 
+	this.lastInView_ = false;
+
 	this.base = PixiView;
 	this.base.apply(this, [workerModel, pixiStage]);
 }
@@ -12,6 +14,7 @@ WorkerView.prototype.makePixiStageMember = function() {
 	var x = worker.getX() * MarkoViewModel.TILE_WIDTH;
 	var y = worker.getY() * MarkoViewModel.TILE_HEIGHT;
 	if (this.camera_.inView(x, y)) {
+		this.lastInView_ = true;
 		var graphics = new PIXI.Graphics();
 		graphics.beginFill(0xFFFFFF);
 		graphics.drawRect(
@@ -21,6 +24,10 @@ WorkerView.prototype.makePixiStageMember = function() {
 			MarkoViewModel.TILE_HEIGHT);
 		graphics.endFill();
 		return graphics;
+	}
+	if(this.lastInView_) {
+		console.log('left view!');
+		this.lastInView_ = false;
 	}
 	return null;
 };

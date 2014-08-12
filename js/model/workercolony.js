@@ -8,6 +8,7 @@ function WorkerColony(mapModel) {
 }
 window.inherits(WorkerColony, Model);
 
+
 WorkerColony.prototype.addWorker = function(workerModel) {
 	var randomX = this.map_.randomTileX();
 	var randomY = this.map_.randomTileY();
@@ -17,9 +18,11 @@ WorkerColony.prototype.addWorker = function(workerModel) {
 	this.workersArray_.push(workerModel);
 };
 
+
 WorkerColony.prototype.getWorkers = function() {
 	return this.workers_;
 };
+
 
 WorkerColony.prototype.update = function() {
 	for (var i = 0; i < this.workersArray_.length; i++) {

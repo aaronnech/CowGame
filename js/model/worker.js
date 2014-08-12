@@ -12,13 +12,18 @@ function Worker() {
 		this.states_[key] = new WorkerState(key, null);
 	}
 	this.stateManager_ = new MarkovChain(Object.keys(WorkerState.Types));
+
+	// Test move state (remove later)
+	var stateName = WorkerState.Types.MOVE_TO;
+	this.states_[stateName].setData({x : 10, y : 10});
+	this.stateManager_.setCurrentState(stateName);
 }
 window.inherits(Worker, Model);
 
 Worker.SPEED = 0.1;
 
 Worker.prototype.update = function(workers) {
-	this.updateMarkovChain(workers.getAll(this.x_, this.y_));
+	// this.updateMarkovChain(workers.getAll(this.x_, this.y_));
 	this.doStateAction();
 	if (this.canUpdateState_) {
 		this.stateManager_.update();
@@ -32,14 +37,20 @@ Worker.prototype.onStateChange = function() {
 		this.states_[this.stateManager_.getCurrentState()];
 	var data = state.getData();
 	var type = state.getType();
-
 	if (data) {
 		switch (type) {
 			case WorkerState.Types.MOVE_TO:
-				// Calculate path here
-				data.iterator = PathGenerator.instance.makePath(
-					this.x_, this.y_, data.x, data.y);
-				state.setData(data);
+				PathGenerator.getInstance().
+					makePath(
+							this.x_,
+							this.y_,
+							data.x,
+							data.y,
+							function(path) {
+						//console.log(path);
+						data.iterator = path;
+						state.setData(data);
+					});
 				break;
 		}
 	}
@@ -51,19 +62,28 @@ Worker.prototype.doStateAction = function() {
 		this.states_[this.stateManager_.getCurrentState()];
 	var data = state.getData();
 	var type = state.getType();
-
 	if (data) {
 		switch (type) {
 			case WorkerState.Types.MOVE_TO:
-				this.moveTowards(data.iterator);
+				if (data.iterator) {
+					this.moveTowards(data.iterator);
+				}
 				break;
 		}
 	}
 };
 
 
-Worker.moveTowards = function(pathIterator) {
-	this.walkTimer_ += Worker.SPEED;
+Worker.prototype.moveTowards = function(pathIterator) {
+	if (pathIterator.length > 0) {
+		if (this.walkTimer_ >= 1) {
+			var direction = pathIterator.shift();
+			this.walkTimer_ = 0;
+			PathGenerator.getInstance().movePhysicalModel(this, direction);
+			this.notifyChange();
+		}
+		this.walkTimer_ += Worker.SPEED;
+	}
 };
 
 
@@ -81,6 +101,7 @@ Worker.prototype.getX = function() {
 	return this.x_;
 };
 
+
 Worker.prototype.getY = function() {
 	return this.y_;
 };
@@ -90,9 +111,11 @@ Worker.prototype.setX = function(x) {
 	this.x_ = x;
 };
 
+
 Worker.prototype.setY = function(y) {
 	this.y_ = y;
 };
+
 
 Worker.prototype.setState = function(stateType, data, opt_probability) {
 	this.states_[stateType].setData(data);
@@ -101,9 +124,11 @@ Worker.prototype.setState = function(stateType, data, opt_probability) {
 	}
 };
 
+
 Worker.prototype.getMarkovChain = function() {
 	return this.stateManager_;
 };
+
 
 Worker.prototype.updateMarkovChain = function(neighbors) {
 	for (var tail in WorkerState.Types) {
