@@ -29,6 +29,8 @@ PixiView.prototype.redrawPixiStageMember = function() {
 		}
 		this.pixiChild_ = temp;
 		this.pixiStage_.addChild(this.pixiChild_);
+	} else if (this.pixiChild_) {
+		this.pixiStage_.removeChild(this.pixiChild_);
 	}
 };
 

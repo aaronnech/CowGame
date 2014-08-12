@@ -18,10 +18,10 @@ WorkerView.prototype.makePixiStageMember = function() {
 		var graphics = new PIXI.Graphics();
 		graphics.beginFill(0xFFFFFF);
 		graphics.drawRect(
-			x,
-			y,
-			MarkoViewModel.TILE_WIDTH,
-			MarkoViewModel.TILE_HEIGHT);
+			x + MarkoViewModel.TILE_WIDTH / 4,
+			y + MarkoViewModel.TILE_WIDTH / 4,
+			MarkoViewModel.TILE_WIDTH / 2,
+			MarkoViewModel.TILE_HEIGHT / 2);
 		graphics.endFill();
 		return graphics;
 	}
