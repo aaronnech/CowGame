@@ -42,7 +42,8 @@ WorkerView.prototype.makePixiStageMember = function() {
 		}
 
 		var graphics = new PIXI.Graphics();
-		graphics.beginFill(0xFFFFFF);
+		var color = worker.isSelected() ? 0xFF0000 : 0xFFFFFF;
+		graphics.beginFill(color);
 		graphics.drawRect(
 			x + MarkoViewModel.TILE_WIDTH / 4 + moveDeltaX,
 			y + MarkoViewModel.TILE_WIDTH / 4 + moveDeltaY,

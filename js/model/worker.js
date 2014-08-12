@@ -1,7 +1,11 @@
 function Worker() {
 	this.base = Model;
 	this.base.apply(this);
+	
+	// selection state
+	this.selected_ = false;
 
+	// coordinate state
 	this.x_ = 0;
 	this.y_ = 0;
 
@@ -9,7 +13,7 @@ function Worker() {
 	this.currentWalkingDirection_ = null;
 	this.walkTimer_ = 0;
 
-	// Markov chain decision making
+	// Markov chain decision making state
 	this.canUpdateState_ = false;
 	this.states_ = {};
 	for (var key in WorkerState.Types) {
@@ -17,7 +21,7 @@ function Worker() {
 	}
 	this.stateManager_ = new MarkovChain(Object.keys(WorkerState.Types));
 
-	// Test move state (remove later)
+	// Test move (remove later)
 	var stateName = WorkerState.Types.MOVE_TO;
 	this.states_[stateName].setData({x : 10, y : 10});
 	this.stateManager_.setCurrentState(stateName);
@@ -88,6 +92,23 @@ Worker.prototype.moveTowards = function(pathIterator) {
 		this.walkTimer_ = 0;
 		PathGenerator.getInstance().movePhysicalModel(this, direction);
 	}
+	this.notifyChange();
+};
+
+
+Worker.prototype.isSelected = function() {
+	return this.selected_;
+};
+
+
+Worker.prototype.onSelect = function() {
+	this.selected_ = true;
+	this.notifyChange();
+};
+
+
+Worker.prototype.onDeselect = function() {
+	this.selected_ = false;
 	this.notifyChange();
 };
 

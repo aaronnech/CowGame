@@ -26,6 +26,17 @@ WorkerColony.prototype.getWorkers = function() {
 
 WorkerColony.prototype.update = function() {
 	for (var i = 0; i < this.workersArray_.length; i++) {
+		var worker = this.workersArray_[i];
+		var beforeX = worker.getX();
+		var beforeY = worker.getY();
+
 		this.workersArray_[i].update(this.workers_);
+
+		var afterX = worker.getX();
+		var afterY = worker.getY();
+		if (beforeX != afterX || beforeY != afterY) {
+			this.workers_.remove(beforeX, beforeY, worker);
+			this.workers_.add(afterX, afterY, worker);
+		}
 	}
 };

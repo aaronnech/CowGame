@@ -11,14 +11,26 @@ Selector.prototype.addSelectables = function(collection) {
 };
 
 
+Selector.prototype.deselectAll = function() {
+	// deselect all
+	while (this.selected_.length > 0) {
+		this.selected_.pop().onDeselect();
+	}
+};
+
+
 Selector.prototype.selectAtCoordinates = function(x, y) {
-	this.selected_ = [];
+	this.deselectAll();
+
+	// select new selectable
 	for (var i = 0; i < this.selectables_.length; i++) {
 		var inArea = this.selectables_[i].getAll(x, y);
 		for (var i = 0; i < inArea.length; i++) {
-			if(inArea[i].getX() == x &&
-				inArea[i].getY() == y) {
-				return inArea[i];
+			var candidate = inArea[i];
+			if(candidate.getX() == x &&
+				candidate.getY() == y) {
+				this.selected_.push(candidate);
+				return candidate;
 			}
 		}
 	}
@@ -32,5 +44,8 @@ Selector.prototype.onClickMap = function() {
 	clickY += this.camera_.getY();
 	clickX = Math.floor(clickX / MarkoViewModel.TILE_WIDTH);
 	clickY = Math.floor(clickY / MarkoViewModel.TILE_HEIGHT);
-	console.log(this.selectAtCoordinates(clickX, clickY));
+	var selected = this.selectAtCoordinates(clickX, clickY);
+	if (selected) {
+		selected.onSelect();
+	}
 };
