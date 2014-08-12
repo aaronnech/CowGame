@@ -82,8 +82,8 @@ MarkoViewModel.prototype = Object.create(ViewModel.prototype);
 
 MarkoViewModel.DISPLAY_WIDTH = 800;
 MarkoViewModel.DISPLAY_HEIGHT = 600;
-MarkoViewModel.WORLD_WIDTH = 3200;
-MarkoViewModel.WORLD_HEIGHT = 2400;
+MarkoViewModel.WORLD_WIDTH = 8192;
+MarkoViewModel.WORLD_HEIGHT = 8192;
 MarkoViewModel.TILE_HEIGHT = 16;
 MarkoViewModel.TILE_WIDTH = 16;
 MarkoViewModel.NUMBER_OF_X_TILES =

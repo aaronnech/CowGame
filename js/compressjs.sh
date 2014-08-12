@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SERVICE_URL=http://closure-compiler.appspot.com/compile
-DEBUG=false
+DEBUG=true
 DEBUGFILE="debug.js"
 COMPILEFILE="compiled.js"
 FILELIST="controller/*.js model/*.js util/*.js view/*.js viewmodel/*.js game/*.js"
