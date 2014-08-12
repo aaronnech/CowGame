@@ -39,11 +39,15 @@ function MarkoViewModel() {
 	console.log('CREATING PATH GENERATOR..');
 	this.pathGenerator_ = PathGenerator.getInstance(this.map_);
 
-	console.log('INITIALIZING SELECT HANDLER..');
-	// Create select handler
-	this.selector_ = new Selector(this.input_);
+	console.log('CREATING RESOURCE MANAGER..');
+	this.resourceManager_ = new ResourceManager(this.map_);
+	console.log('SPAWNING INITIAL RESOURCES..');
+	this.resourceManager_.spawnInitial();
 
-	console.log('SPAWNING COLONIES..');
+	console.log('CREATING BUILDING MANAGER..');
+	this.buildingManager_ = new BuildingManager(this.map_);
+
+	console.log('SPAWNING COLONY..');
 	// Place a colony down (test for now)
 	this.colony_ = new WorkerColony(this.map_);
 	for (var i = 0; i < 100; i++) {
@@ -52,6 +56,10 @@ function MarkoViewModel() {
 		this.colony_.addWorker(worker);
 		worker.onStateChange();
 	}
+
+	console.log('INITIALIZING SELECT HANDLER..');
+	// Create select handler
+	this.selector_ = new Selector(this.input_, this.colony_);
 
 	console.log('BINDING INPUT..');
 	// Camera panning
