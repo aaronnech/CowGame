@@ -4,9 +4,13 @@ function Worker() {
 
 	this.x_ = 0;
 	this.y_ = 0;
-	this.canUpdateState_ = false;
+
+	// Walk state
+	this.currentWalkingDirection_ = null;
 	this.walkTimer_ = 0;
 
+	// Markov chain decision making
+	this.canUpdateState_ = false;
 	this.states_ = {};
 	for (var key in WorkerState.Types) {
 		this.states_[key] = new WorkerState(key, null);
@@ -65,8 +69,10 @@ Worker.prototype.doStateAction = function() {
 	if (data) {
 		switch (type) {
 			case WorkerState.Types.MOVE_TO:
-				if (data.iterator) {
+				if (data.iterator && data.iterator.length > 0) {
 					this.moveTowards(data.iterator);
+				} else {
+					this.currentWalkingDirection_ = null;
 				}
 				break;
 		}
@@ -75,15 +81,24 @@ Worker.prototype.doStateAction = function() {
 
 
 Worker.prototype.moveTowards = function(pathIterator) {
-	if (pathIterator.length > 0) {
-		if (this.walkTimer_ >= 1) {
-			var direction = pathIterator.shift();
-			this.walkTimer_ = 0;
-			PathGenerator.getInstance().movePhysicalModel(this, direction);
-			this.notifyChange();
-		}
-		this.walkTimer_ += Worker.SPEED;
+	this.currentWalkingDirection_ = pathIterator[0];
+	this.walkTimer_ += Worker.SPEED;
+	if (this.walkTimer_ >= 1) {
+		var direction = pathIterator.shift();
+		this.walkTimer_ = 0;
+		PathGenerator.getInstance().movePhysicalModel(this, direction);
 	}
+	this.notifyChange();
+};
+
+
+Worker.prototype.getDirection = function() {
+	return this.currentWalkingDirection_;
+};
+
+
+Worker.prototype.getMoveProgress = function() {
+	return this.walkTimer_;
 };
 
 

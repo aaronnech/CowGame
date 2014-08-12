@@ -22,15 +22,12 @@ PixiView.prototype.getPixiStageMember = function() {
 
 
 PixiView.prototype.redrawPixiStageMember = function() {
-	var temp = this.makePixiStageMember();
-	if (temp) {
-		if (this.pixiChild_) {
-			this.pixiStage_.removeChild(this.pixiChild_);
-		}
-		this.pixiChild_ = temp;
-		this.pixiStage_.addChild(this.pixiChild_);
-	} else if (this.pixiChild_) {
+	if (this.pixiChild_) {
 		this.pixiStage_.removeChild(this.pixiChild_);
+	}
+	this.pixiChild_ = this.makePixiStageMember();
+	if (this.pixiChild_) {
+		this.pixiStage_.addChild(this.pixiChild_);
 	}
 };
 
