@@ -8,12 +8,45 @@ function Camera(worldWidth, worldHeight, width, height) {
 	this.height_ = height;
 	this.worldWidth_ = worldWidth;
 	this.worldHeight_ = worldHeight;
+
+	this.attached_ = null;
 }
 window.inherits(Camera, Model);
 
 
 // In pixels per frame
 Camera.PAN_SPEED = 10;
+
+
+Camera.prototype.update = function() {
+	if (this.attached_ != null) {
+		var x = this.attached_.getX();
+		var y = this.attached_.getY();
+		if (!this.inView(x, y)) {
+
+		}
+	}
+};
+
+
+Camera.prototype.attach = function(view) {
+	this.attached_ = view;
+	var x = this.attached_.getX();
+	var y = this.attached_.getY();
+	var deltaX = x - this.x_ - this.width_ / 2;
+	var deltaY = y - this.y_ - this.height_ / 2;
+	if (deltaX != 0) {
+		this.moveX(deltaX);
+	}
+	if (deltaY != 0) {
+		this.moveY(deltaY);
+	}
+};
+
+
+Camera.prototype.detatch = function(view) {
+	this.attached_ = null;
+};
 
 
 Camera.prototype.inView = function(x, y) {

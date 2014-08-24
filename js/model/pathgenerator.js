@@ -9,19 +9,13 @@ function PathGenerator(mapModel) {
 	this.map_ = mapModel;
 
 	console.log('constructing path finder..');
-	this.pathFinder_ = new EasyStar.js();
+	this.pathFinder_ = null;
 
 	console.log('Building collision map..');
-	this.pathFinder_.setAcceptableTiles([0]);
-	this.pathFinder_.setIterationsPerCalculation(500); 
 	this.updateCollisionMap();
 
 	console.log('setting path generator instance');
 	PathGenerator.instance_ = this;
-	setInterval(
-		function() {
-			self.calculatePaths_();
-		}, 300);
 };
 
 PathGenerator.instance_ = null;
@@ -35,11 +29,6 @@ PathGenerator.getInstance = function(opt_mapModel) {
 		throw 'No map model provided for construction!';
 	}
 	return new PathGenerator(opt_mapModel);
-};
-
-
-PathGenerator.prototype.calculatePaths_ = function() {
-	this.pathFinder_.calculate();
 };
 
 
@@ -65,7 +54,7 @@ PathGenerator.prototype.buildCollisionMap_ = function() {
 
 
 PathGenerator.prototype.updateCollisionMap = function() {
-	this.pathFinder_.setGrid(this.buildCollisionMap_());
+	// TODO: use buildCollisionMap_ to hook up pathfinder.
 };
 
 
@@ -74,38 +63,38 @@ PathGenerator.prototype.makePath = function(x1, y1, x2, y2, callback) {
 	// return a path iterator.
 	if (this.map_.isInMap(x1, y1) &&
 		this.map_.isInMap(x2, y2)) {
-		this.pathFinder_.findPath(x1, y1, x2, y2, function(path) {
-			console.log('path calculated from ' + x1 + ',' + y1 + ' to ' + x2 + ',' + y2);
-		    if (path === null) {
-		        callback(null);
-		    } else {
-		    	var result = [];
-		    	var current = {x : x1, y : y1};
-		    	for (var i = 0; i < path.length; i++) {
-		    		var next = path[i];
-		    		// check if horizontal or vertical
-		    		if(current.x - next.x != 0) {
-		    			if (current.x > next.x) {
-		    				result.push(
-		    					PathGenerator.ManhattanDirection.MOVE_WEST);
-		    			} else {
-		    				result.push(
-		    					PathGenerator.ManhattanDirection.MOVE_EAST);		    				
-		    			}
-		    		} else {
-		    			if (current.y > next.y) {
-		    				result.push(
-		    					PathGenerator.ManhattanDirection.MOVE_NORTH);
-		    			} else {
-		    				result.push(
-		    					PathGenerator.ManhattanDirection.MOVE_SOUTH);		    				
-		    			}
-		    		}
-		    		current = next;
-		    	}
-		    	callback(result);
-		    }
-		});
+		// this.pathFinder_.findPath(x1, y1, x2, y2, function(path) {
+		// 	console.log('path calculated from ' + x1 + ',' + y1 + ' to ' + x2 + ',' + y2);
+		//     if (path === null) {
+		//         callback(null);
+		//     } else {
+		//     	var result = [];
+		//     	var current = {x : x1, y : y1};
+		//     	for (var i = 0; i < path.length; i++) {
+		//     		var next = path[i];
+		//     		// check if horizontal or vertical
+		//     		if(current.x - next.x != 0) {
+		//     			if (current.x > next.x) {
+		//     				result.push(
+		//     					PathGenerator.ManhattanDirection.MOVE_WEST);
+		//     			} else {
+		//     				result.push(
+		//     					PathGenerator.ManhattanDirection.MOVE_EAST);		    				
+		//     			}
+		//     		} else {
+		//     			if (current.y > next.y) {
+		//     				result.push(
+		//     					PathGenerator.ManhattanDirection.MOVE_NORTH);
+		//     			} else {
+		//     				result.push(
+		//     					PathGenerator.ManhattanDirection.MOVE_SOUTH);		    				
+		//     			}
+		//     		}
+		//     		current = next;
+		//     	}
+		//     	callback(result);
+		//     }
+		// });
 	}
 };
 

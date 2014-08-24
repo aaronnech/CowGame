@@ -55,7 +55,6 @@ Worker.prototype.onStateChange = function() {
 							data.x,
 							data.y,
 							function(path) {
-						//console.log(path);
 						data.iterator = path;
 						state.setData(data);
 					});

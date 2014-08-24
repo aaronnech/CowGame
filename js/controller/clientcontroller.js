@@ -15,7 +15,13 @@ ClientController.prototype.setBindings = function() {
 	this.bind(Action.ViewActions.PAN_DOWN, this.panCameraDown);
 	this.bind(Action.ViewActions.PAN_LEFT, this.panCameraLeft);
 	this.bind(Action.ViewActions.PAN_RIGHT, this.panCameraRight);
+
 	this.bind(Action.ViewActions.CLICK_MAP, this.clickMap);
+
+	this.bind(Action.ViewActions.MOVE_UP, this.moveUp);
+	this.bind(Action.ViewActions.MOVE_DOWN, this.moveDown);
+	this.bind(Action.ViewActions.MOVE_LEFT, this.moveLeft);
+	this.bind(Action.ViewActions.MOVE_RIGHT, this.moveRight);
 };
 
 
@@ -46,6 +52,26 @@ ClientController.prototype.panCameraLeft = function() {
 
 ClientController.prototype.panCameraRight = function() {
 	this.viewModel_.panCameraRight();
+};
+
+
+ClientController.prototype.moveUp = function() {
+	this.viewModel_.moveHeroUp();
+};
+
+
+ClientController.prototype.moveDown = function() {
+	this.viewModel_.moveHeroDown();
+};
+
+
+ClientController.prototype.moveLeft = function() {
+	this.viewModel_.moveHeroLeft();
+};
+
+
+ClientController.prototype.moveRight = function() {
+	this.viewModel_.moveHeroRight();
 };
 
 

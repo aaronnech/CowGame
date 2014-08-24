@@ -1,6 +1,8 @@
-function PixiView(model, pixiStage) {
-	this.model_ = model;
-	this.model_.subscribeView(this);
+function PixiView(models, pixiStage) {
+	this.models_ = models;
+	for (var i = 0; i < models.length; i++) {
+		this.models_[i].subscribeView(this);
+	}
 
 	this.pixiStage_ = pixiStage;
 
@@ -11,8 +13,8 @@ function PixiView(model, pixiStage) {
 }
 
 
-PixiView.prototype.getModel = function() {
-	return this.model_;
+PixiView.prototype.getModels = function() {
+	return this.models_;
 };
 
 
@@ -28,6 +30,16 @@ PixiView.prototype.redrawPixiStageMember = function() {
 	this.pixiChild_ = this.makePixiStageMember();
 	if (this.pixiChild_) {
 		this.pixiStage_.addChild(this.pixiChild_);
+	}
+};
+
+
+PixiView.prototype.dispose = function() {
+	if (this.pixiChild_) {
+		this.pixiStage_.removeChild(this.pixiChild_);
+	}
+	for (var i = 0; i < this.models_.length; i++) {
+		this.models_[i].removeView(this);
 	}
 };
 

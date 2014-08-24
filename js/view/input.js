@@ -10,6 +10,8 @@ function Input(canvas) {
 	this.keyHitState_ = {};
 
 	// Mouse states and bindings
+	this.mouseMovedForClick_ = false;
+	this.mouseDownState_ = [false, false]
 	this.mouseHitState_ = [false, false];
 	this.mouseHitBindings_ = [[], []];
     this.mouseX_ = 0;
@@ -32,17 +34,30 @@ function Input(canvas) {
 	    self.keyHitState_[mapKey] = true;
 	});
 
-	this.addBrowserEventListener_(this.canvas_, 'click', function(e) {
-		self.mouseHitState_[Input.Mouse.LEFT] = true;
+	this.addBrowserEventListener_(this.canvas_, 'mousedown', function(e) {
+		self.mouseDownState_[Input.Mouse.LEFT] = true;
+		self.mouseMovedForClick_ = 0;
 	});
 
+	this.addBrowserEventListener_(this.canvas_, 'mouseup', function(e) {
+		self.mouseDownState_[Input.Mouse.LEFT] = false;
+		if (self.mouseMovedForClick_ < Input.CLICK_THRESHOLD) {
+			self.mouseHitState_[Input.Mouse.LEFT] = true;
+		}
+	});
 
 	this.addBrowserEventListener_(this.canvas_, 'mousemove', function(e) {
         var rect = self.canvas_.getBoundingClientRect();
+        var oldX = self.mouseX_;
+        var oldY = self.mouseY_;
         self.mouseX_ = e.clientX - rect.left;
         self.mouseY_ = e.clientY - rect.top;
+        self.mouseMovedForClick_ +=
+        	Math.abs(oldX - self.mouseX_) + Math.abs(oldY - self.mouseY_);
 	});
 }
+
+Input.CLICK_THRESHOLD = 10;
 
 Input.Mouse = {
 	LEFT : 0,
@@ -53,7 +68,16 @@ Input.Keys = {
 	RIGHT : '39',
 	LEFT : '37',
 	UP : '38',
-	DOWN : '40'
+	DOWN : '40',
+	A : '65',
+	W : '87',
+	S : '83',
+	D : '68'
+};
+
+
+Input.prototype.isMouseDown = function(button) {
+	return this.mouseDownState_[button];
 };
 
 

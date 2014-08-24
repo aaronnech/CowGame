@@ -39,14 +39,6 @@ function MarkoViewModel() {
 	console.log('CREATING PATH GENERATOR..');
 	this.pathGenerator_ = PathGenerator.getInstance(this.map_);
 
-	console.log('CREATING RESOURCE MANAGER..');
-	this.resourceManager_ = new ResourceManager(this.map_);
-	console.log('SPAWNING INITIAL RESOURCES..');
-	this.resourceManager_.spawnInitial();
-
-	console.log('CREATING BUILDING MANAGER..');
-	this.buildingManager_ = new BuildingManager(this.map_);
-
 	console.log('SPAWNING COLONY..');
 	// Place a colony down (test for now)
 	this.colony_ = new WorkerColony(this.map_);
@@ -56,6 +48,25 @@ function MarkoViewModel() {
 		this.colony_.addWorker(worker);
 		worker.onStateChange();
 	}
+
+	console.log('CREATING RESOURCE MANAGER..');
+	this.resourceManager_ = new ResourceManager(this.map_);
+
+	console.log('CREATING BULLET MANAGER..');
+	this.bulletManager_ = new BulletManager(this.map_, this.colony_);
+
+	console.log('SPAWNING INITIAL RESOURCES..');
+	this.resourceManager_.spawnInitial();
+
+	console.log('CREATING BUILDING MANAGER..');
+	this.buildingManager_ = new BuildingManager(this.map_);
+
+
+	console.log('SPAWNING HERO..');
+	var startX = Math.floor(MarkoViewModel.NUMBER_OF_X_TILES / 2);
+	var startY = Math.floor(MarkoViewModel.NUMBER_OF_Y_TILES / 2);
+	this.hero_ = new Hero(this.bulletManager_, startX, startY);
+	this.heroView_ = new HeroView(this.hero_, this.camera_, this.pixiWorld_);
 
 	console.log('INITIALIZING SELECT HANDLER..');
 	// Create select handler
@@ -77,6 +88,17 @@ function MarkoViewModel() {
 	this.input_.bindKeyDownAction(
 		Input.Keys.LEFT, Action.ViewActions.PAN_LEFT);
 
+	// Hero moving
+	this.input_.bindKeyDownAction(
+		Input.Keys.W, Action.ViewActions.MOVE_UP);
+	this.input_.bindKeyDownAction(
+		Input.Keys.S, Action.ViewActions.MOVE_DOWN);
+	this.input_.bindKeyDownAction(
+		Input.Keys.D, Action.ViewActions.MOVE_RIGHT);
+	this.input_.bindKeyDownAction(
+		Input.Keys.A, Action.ViewActions.MOVE_LEFT);
+
+	console.log('ATTACHING CAMERA..');
 	// Move the camera to the starting position
 	this.camera_.moveX(MarkoViewModel.WORLD_WIDTH / 2);
 	this.camera_.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
@@ -108,11 +130,36 @@ MarkoViewModel.prototype.update = function() {
 	// every game loop here
 	this.input_.update();
 	this.colony_.update();
+	this.hero_.update();
+	this.bulletManager_.update();
+	this.camera_.update();
 };
 
 
 MarkoViewModel.prototype.clickMap = function() {
 	this.selector_.onClickMap();
+	this.makeBullet(
+		this.hero_.getX(),
+		this.hero_.getY(),
+		this.selector_.getLastMapClickX(),
+		this.selector_.getLastMapClickY());
+};
+
+MarkoViewModel.prototype.makeBullet =
+		function(sourceX, sourceY, destX, destY) {
+	var deltaY = sourceY - destY;
+	var deltaX = sourceX - destX;
+	var angle = Math.atan2(deltaY, deltaX);
+	var normalizedY = -1 * Math.sin(angle);
+	var normalizedX = -1 * Math.cos(angle);
+	var bullet = new Bullet();
+	bullet.setX(sourceX + 0.5);
+	bullet.setY(sourceY + 0.5);
+	bullet.setDx(normalizedX);
+	bullet.setDy(normalizedY);
+	var bulletView = new BulletView(
+		bullet, this.camera_, this.pixiWorld_);
+	this.bulletManager_.addBullet(bullet);
 };
 
 
@@ -133,4 +180,23 @@ MarkoViewModel.prototype.panCameraUp = function() {
 
 MarkoViewModel.prototype.panCameraDown = function() {
 	this.camera_.panDown();
+};
+
+MarkoViewModel.prototype.moveHeroLeft = function() {
+	this.hero_.moveLeft();
+};
+
+
+MarkoViewModel.prototype.moveHeroRight = function() {
+	this.hero_.moveRight();
+};
+
+
+MarkoViewModel.prototype.moveHeroUp = function() {
+	this.hero_.moveUp();
+};
+
+
+MarkoViewModel.prototype.moveHeroDown = function() {
+	this.hero_.moveDown();
 };
