@@ -1,97 +1,97 @@
-function Map(width, height, tileWidth, tileHeight) {
-	this.base = Model;
-	this.base.apply(this);
+import Model = require('./model');
+import Tile = require('./tile');
 
-	this.tileWidth_ = tileWidth;
-	this.tileHeight_ = tileHeight;
-	this.width_ = width;
-	this.height_ = height;
-	this.tiles_ = [];
+class Map extends Model {
+    private tileWidth : number;
+    private tileHeight : number;
+    private width : number;
+    private height : number;
+    private tiles : Tile[];
 
-	for (var y = 0; y < this.height_; y++) {
-		for (var x = 0; x < this.width_; x++) {
-			this.tiles_[this.toLinearIndex_(x, y)] =
-				new Tile(tileWidth, tileHeight);
-		}
-	}
-	console.log('map constructed with ' + this.tiles_.length + ' tiles');
+    constructor(width, height, tileWidth, tileHeight) {
+        super();
+
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
+        this.width = width;
+        this.height = height;
+        this.tiles = [];
+
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                this.tiles[this.toLinearIndex(x, y)] =
+                    new Tile(tileWidth, tileHeight);
+            }
+        }
+        console.log('map constructed with ' + this.tiles.length + ' tiles');
+    }
+
+    public getWidth() {
+        return this.width;
+    }
+
+    public getHeight() {
+        return this.height;
+    }
+
+    public forEachTile(f) {
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                var tile = this.getTile(x, y);
+                if (tile) {
+                    f(tile, x, y);
+                }
+            }
+        }
+    }
+
+    public forEachTileInRect(x, y, w, h, f) {
+        var startX = this.toTileX(x);
+        var endX = this.toTileX(w) + startX;
+        var startY = this.toTileX(y);
+        var endY = this.toTileX(h) + startY + 1;
+
+        for (var i = startY; i <= endY; i++) {
+            for (var j = startX; j <= endX; j++) {
+                var tile = this.getTile(j, i);
+                if (tile) {
+                    f(tile, j, i);
+                }
+            }
+        }
+    }
+
+    public isInMap(x, y) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    private toTileX(x) {
+        return Math.floor(x / this.tileWidth);
+    }
+
+    private toTileY(y) {
+        return Math.floor(y / this.tileHeight);
+    }
+
+    public randomTileX() {
+        return Math.floor(Math.random() * this.width);
+    }
+
+    public randomTileY() {
+        return Math.floor(Math.random() * this.height);
+    }
+
+    private toLinearIndex(x, y) {
+        return Math.floor(y * this.width + x);
+    }
+
+    public getTile(x, y) {
+        if (this.isInMap(x, y)) {
+            return this.tiles[this.toLinearIndex(x, y)];
+        } else {
+            return null;
+        }
+    }
 }
-window.inherits(Map, Model);
 
-
-Map.prototype.getWidth = function() {
-	return this.width_;
-};
-
-
-Map.prototype.getHeight = function() {
-	return this.height_;
-};
-
-
-Map.prototype.forEachTile = function(f) {
-	for (var y = 0; y < this.height_; y++) {
-		for (var x = 0; x < this.width_; x++) {
-			var tile = this.getTile(x, y);
-			if (tile) {
-				f(tile, x, y);
-			}
-		}
-	}
-};
-
-
-Map.prototype.forEachTileInRect = function(x, y, w, h, f) {
-	var startX = this.toTileX_(x);
-	var endX = this.toTileX_(w) + startX;
-	var startY = this.toTileX_(y);
-	var endY = this.toTileX_(h) + startY + 1;
-
-	for (var y = startY; y <= endY; y++) {
-		for (var x = startX; x <= endX; x++) {
-			var tile = this.getTile(x, y);
-			if (tile) {
-				f(tile, x, y);
-			}
-		}
-	}
-};
-
-
-Map.prototype.isInMap = function(x, y) {
-	return x >= 0 && x < this.width_ && y >= 0 && y < this.height_;
-};
-
-
-Map.prototype.toTileX_ = function(x) {
-	return Math.floor(x / this.tileWidth_);
-};
-
-
-Map.prototype.toTileY_ = function(x) {
-	return Math.floor(y / this.tileHeight_);
-};
-
-
-Map.prototype.randomTileX = function() {
-	return Math.floor(Math.random() * this.width_);
-};
-
-
-Map.prototype.randomTileY = function() {
-	return Math.floor(Math.random() * this.height_);
-};
-
-
-Map.prototype.toLinearIndex_ = function(x, y) {
-	return Math.floor(y * this.width_ + x);
-};
-
-
-Map.prototype.getTile = function(x, y) {
-	if (this.isInMap(x, y)) {
-		return this.tiles_[this.toLinearIndex_(x, y)];
-	} else {
-		return null;
-	}
-};
+export = Map;

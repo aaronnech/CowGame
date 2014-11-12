@@ -1,36 +1,41 @@
-function SpacialHash(width, height, granularity) {
-	this.width_ = width;
-	this.height_ = height;
-	this.granularity_ = granularity;
-	this.buckets_ = {};
+class SpacialHash {
+    private width:number;
+    private height:number;
+    private granularity:number;
+    private buckets:any;
+
+    constructor(width, height, granularity) {
+        this.width = width;
+        this.height = height;
+        this.granularity = granularity;
+        this.buckets = {};
+    }
+
+    private hash(x, y) {
+        var hashedX = Math.ceil(x / this.granularity);
+        var hashedY = Math.ceil(y / this.granularity);
+        var key = hashedX + ',' + hashedY;
+        if (!this.buckets[key]) {
+            this.buckets[key] = [];
+        }
+        return key;
+    }
+
+    public getAll(x, y) {
+        return this.buckets[this.hash(x, y)];
+    }
+
+    public add(x, y, obj) {
+        this.buckets[this.hash(x, y)].push(obj);
+    }
+
+    public remove = function (x, y, obj) {
+        var array = this.buckets[this.hash(x, y)];
+        var index = array.indexOf(obj);
+        if (index != -1) {
+            array.splice(index, 1);
+        }
+    }
 }
 
-
-SpacialHash.prototype.hash_ = function(x, y) {
-	var hashedX = Math.ceil(x / this.granularity_);
-	var hashedY = Math.ceil(y / this.granularity_);
-	var key = hashedX + ',' + hashedY;
-	if (!this.buckets_[key]) {
-		this.buckets_[key] = [];
-	}
-	return key; 
-};
-
-
-SpacialHash.prototype.getAll = function(x, y) {
-	return this.buckets_[this.hash_(x, y)];
-};
-
-
-SpacialHash.prototype.add = function(x, y, obj) {
-	this.buckets_[this.hash_(x, y)].push(obj);
-};
-
-
-SpacialHash.prototype.remove = function(x, y, obj) {
-	var array = this.buckets_[this.hash_(x, y)];
-	var index = array.indexOf(obj);
-	if (index != -1) {
-		array.splice(index, 1);
-	}
-};
+export = SpacialHash;

@@ -1,49 +1,62 @@
-function WorkerColony(mapModel) {
-	this.map_ = mapModel;
-	this.workers_ = new SpacialHash(
-		this.map_.getWidth(),
-		this.map_.getHeight(),
-		9);
-	this.workersArray_ = [];
+import Model = require('./model');
+import Map = require('./map');
+import SpacialHash = require('../util/spacialhash');
+import Worker = require('./worker');
+
+class WorkerColony extends Model {
+
+    private map : Map;
+    private workers : SpacialHash;
+    private workersArray : any;
+
+    constructor(mapModel : Map) {
+        super();
+        this.map = mapModel;
+        this.workers = new SpacialHash(
+            this.map.getWidth(),
+            this.map.getHeight(),
+            9);
+        this.workersArray = [];
+    }
+
+    public hitWorker(hit) {
+        var index = this.workersArray.indexOf(hit);
+        this.workersArray.splice(index, 1);
+        this.workers.remove(hit.getX(), hit.getY(), hit);
+        hit.dispose();
+    }
+
+    public addWorker(workerModel) {
+        var randomX = this.map.randomTileX();
+        var randomY = this.map.randomTileY();
+        workerModel.setX(randomX);
+        workerModel.setY(randomY);
+        this.workers.add(randomX, randomY, workerModel);
+        this.workersArray.push(workerModel);
+    }
+
+
+    public getWorkers() {
+        return this.workers;
+    }
+
+
+    public update() {
+        for (var i = 0; i < this.workersArray.length; i++) {
+            var worker = this.workersArray[i];
+            var beforeX = worker.getX();
+            var beforeY = worker.getY();
+
+            this.workersArray[i].update(this.workers);
+
+            var afterX = worker.getX();
+            var afterY = worker.getY();
+            if (beforeX != afterX || beforeY != afterY) {
+                this.workers.remove(beforeX, beforeY, worker);
+                this.workers.add(afterX, afterY, worker);
+            }
+        }
+    }
 }
-window.inherits(WorkerColony, Model);
 
-
-WorkerColony.prototype.hitWorker = function(hit) {
-	var index = this.workersArray_.indexOf(hit);
-	this.workersArray_.splice(index, 1);
-	this.workers_.remove(hit.getX(), hit.getY(), hit);
-	hit.dispose();
-};
-
-WorkerColony.prototype.addWorker = function(workerModel) {
-	var randomX = this.map_.randomTileX();
-	var randomY = this.map_.randomTileY();
-	workerModel.setX(randomX);
-	workerModel.setY(randomY);
-	this.workers_.add(randomX, randomY, workerModel);
-	this.workersArray_.push(workerModel);
-};
-
-
-WorkerColony.prototype.getWorkers = function() {
-	return this.workers_;
-};
-
-
-WorkerColony.prototype.update = function() {
-	for (var i = 0; i < this.workersArray_.length; i++) {
-		var worker = this.workersArray_[i];
-		var beforeX = worker.getX();
-		var beforeY = worker.getY();
-
-		this.workersArray_[i].update(this.workers_);
-
-		var afterX = worker.getX();
-		var afterY = worker.getY();
-		if (beforeX != afterX || beforeY != afterY) {
-			this.workers_.remove(beforeX, beforeY, worker);
-			this.workers_.add(afterX, afterY, worker);
-		}
-	}
-};
+export = WorkerColony;

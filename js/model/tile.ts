@@ -1,25 +1,37 @@
-function Tile(width, height) {
-	this.isOccupied_ = false;
-	this.color_ = Math.random() > 0.5 ? null : 0x33AA33;
-	this.width_ = width;
-	this.height_ = height;
-};
+import Model = require('./model');
 
-Tile.prototype.getWidth = function() {
-	return this.width_;
-};
+class Tile extends Model {
+    private color : number;
+    private width : number;
+    private height : number;
+    private isOccupied : boolean;
+
+    constructor(width, height) {
+        super();
+        this.isOccupied = false;
+        this.color = Math.random() > 0.5 ? null : 0x33AA33;
+        this.width = width;
+        this.height = height;
+    }
+
+    public getWidth() {
+        return this.width;
+    }
 
 
-Tile.prototype.getHeight = function() {
-	return this.height_;
-};
+    public getHeight() {
+        return this.height;
+    }
 
 
-Tile.prototype.getColor = function() {
-	return this.color_;
-};
+    public getColor() {
+        return this.color;
+    }
 
 
-Tile.prototype.isOccupied = function() {
-	return this.isOccupied_;
-};
+    public getIsOccupied() {
+        return this.isOccupied;
+    }
+}
+
+export = Tile;

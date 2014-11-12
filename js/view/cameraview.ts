@@ -1,18 +1,25 @@
-function CameraView(cameraModel, pixiStage, world) {
-	this.base = PixiView;
-	this.base.apply(this, [[cameraModel], pixiStage]);
+import Model = require('../model/model');
+import Camera = require('../model/camera');
+import PixiView = require('./pixiview');
 
-	this.world_ = world;
+class CameraView extends PixiView {
+    private world : any;
+    private camera : Camera;
+
+    constructor(cameraModel : Camera, pixiStage : any, world : any) {
+        super([cameraModel], pixiStage);
+        this.world = world;
+        this.camera = cameraModel;
+    }
+
+    public makePixiStageMember() {
+        return new PIXI.DisplayObjectContainer();
+    }
+
+    public notify() {
+        this.world.position.x = -this.camera.getX();
+        this.world.position.y = -this.camera.getY();
+    }
 }
-window.inherits(CameraView, PixiView);
 
-CameraView.prototype.makePixiStageMember = function() {
-	return new PIXI.DisplayObjectContainer();
-};
-
-
-CameraView.prototype.notify = function() {
-	var camera = this.getModels()[0];
-	this.world_.position.x = -camera.getX();
-	this.world_.position.y = -camera.getY();
-};
+export = CameraView;

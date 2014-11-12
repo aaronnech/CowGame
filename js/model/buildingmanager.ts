@@ -1,9 +1,21 @@
-function BuildingManager(mapModel) {
-	this.map_ = mapModel;
-	this.buildings_ = new SpacialHash(
-		this.map_.getWidth(),
-		this.map_.getHeight(),
-		9);
-	this.buildingsArray_ = [];
+import SpacialHash = require('../util/spacialhash');
+import Map = require('./map');
+import Model = require('./model');
+
+class BuildingManager extends Model {
+    private map : Map;
+    private buildings : SpacialHash;
+    private buildingsArray : any;
+
+    constructor(mapModel : Map) {
+        super();
+        this.map = mapModel;
+        this.buildings = new SpacialHash(
+            this.map.getWidth(),
+            this.map.getHeight(),
+            9);
+        this.buildingsArray = [];
+    }
 }
-window.inherits(BuildingManager, Model);
+
+export = BuildingManager;

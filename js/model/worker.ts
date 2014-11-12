@@ -1,209 +1,228 @@
-function Worker() {
-	this.base = Model;
-	this.base.apply(this);
-	
-	// selection state
-	this.selected_ = false;
+import Model = require('./model');
+import MarkovChain = require('../util/markovchain');
+import PathGenerator = require('../util/pathgenerator');
+import WorkerState = require('./workerstate');
 
-	// coordinate state
-	this.x_ = 0;
-	this.y_ = 0;
+class Worker extends Model {
+    public static SPEED : number = 0.1;
 
-	// Walk state
-	this.currentWalkingDirection_ = null;
-	this.walkTimer_ = 0;
+    private selected : boolean;
 
-	// Markov chain decision making state
-	this.canUpdateState_ = false;
-	this.states_ = {};
-	for (var key in WorkerState.Types) {
-		this.states_[key] = new WorkerState(key, null);
-	}
-	this.stateManager_ = new MarkovChain(Object.keys(WorkerState.Types));
+    private x : number;
+    private y : number;
 
-	// Test move (remove later)
-	var stateName = WorkerState.Types.MOVE_TO;
-	this.states_[stateName].setData({x : 10, y : 10});
-	this.stateManager_.setCurrentState(stateName);
+    private currentWalkingDirection : any;
+    private walkTimer : number;
+
+    private canUpdateState : boolean;
+    private states : any;
+
+    private stateManager : MarkovChain;
+
+    constructor() {
+        super();
+        // selection state
+        this.selected = false;
+
+        // coordinate state
+        this.x = 0;
+        this.y = 0;
+
+        // Walk state
+        this.currentWalkingDirection = null;
+        this.walkTimer = 0;
+
+        // Markov chain decision making state
+        this.canUpdateState = false;
+        this.states = {}
+        for (var key in WorkerState.Types) {
+            this.states[key] = new WorkerState(key, null);
+        }
+        this.stateManager = new MarkovChain(Object.keys(WorkerState.Types));
+
+        // Test move (remove later)
+        var stateName = WorkerState.Types.MOVETO;
+        this.states[stateName].setData({x :  10, y :  10});
+        this.stateManager.setCurrentState(stateName);
+    }
+
+    public update(workers) {
+        // this.updateMarkovChain(workers.getAll(this.x, this.y));
+        this.doStateAction();
+        if (this.canUpdateState) {
+            this.stateManager.update();
+            this.onStateChange();
+        }
+    }
+
+
+    public onStateChange() {
+        var state =
+            this.states[this.stateManager.getCurrentState()];
+        var data = state.getData();
+        var type = state.getType();
+        if (data) {
+            switch (type) {
+                case WorkerState.Types.MOVETO : 
+//                    PathGenerator.getInstance().
+//                        makePath(
+//                        this.x,
+//                        this.y,
+//                        data.x,
+//                        data.y,
+//                        function (path) {
+//                            data.iterator = path;
+//                            state.setData(data);
+//                        });
+                    break;
+            }
+        }
+    }
+
+
+    public doStateAction() {
+        var state =
+            this.states[this.stateManager.getCurrentState()];
+        var data = state.getData();
+        var type = state.getType();
+        if (data) {
+            switch (type) {
+                case WorkerState.Types.MOVETO : 
+                    if (data.iterator && data.iterator.length > 0) {
+                        this.moveTowards(data.iterator);
+                    } else {
+                        this.currentWalkingDirection = null;
+                    }
+                    break;
+            }
+        }
+    }
+
+
+    public moveTowards(pathIterator) {
+        this.currentWalkingDirection = pathIterator[0];
+        this.walkTimer += Worker.SPEED;
+        if (this.walkTimer >= 1) {
+            var direction = pathIterator.shift();
+            this.walkTimer = 0;
+            // PathGenerator.getInstance().movePhysicalModel(this, direction);
+        }
+        this.notifyChange();
+    }
+
+
+    public isSelected() {
+        return this.selected;
+    }
+
+
+    public onSelect() {
+        this.selected = true;
+        this.notifyChange();
+    }
+
+
+    public onDeselect() {
+        this.selected = false;
+        this.notifyChange();
+    }
+
+
+    public getDirection() {
+        return this.currentWalkingDirection;
+    }
+
+
+    public getMoveProgress() {
+        return this.walkTimer;
+    }
+
+
+    public getWidth() {
+        return 1;
+    }
+
+
+    public getHeight() {
+        return 1;
+    }
+
+
+    public getX() {
+        return this.x;
+    }
+
+
+    public getY() {
+        return this.y;
+    }
+
+
+    public setX(x) {
+        this.x = x;
+    }
+
+
+    public setY(y) {
+        this.y = y;
+    }
+
+
+    public setState(stateType, data, optprobability) {
+        this.states[stateType].setData(data);
+        if (optprobability) {
+            // this.stateManager.setProbability(stateType, optprobability);
+        }
+    }
+
+
+    public getMarkovChain() {
+        return this.stateManager;
+    }
+
+
+    public updateMarkovChain(neighbors) {
+        for (var tail in WorkerState.Types) {
+            for (var head in WorkerState.Types) {
+                // Calculate an average probability matrix
+                var average = 0.0;
+                for (var i = 0; i < neighbors.length; i++) {
+                    var neighbor = neighbors[i];
+                    average += neighbor.getMarkovChain().getProbability(tail, head);
+                }
+
+                // Set the current probability to the average, and calculate
+                // the delta needed to make this change.
+                var current = this.stateManager.getProbability(tail, head);
+                average = (average + current) / (neighbors.length + 1.0);
+                var delta = average - current;
+                this.stateManager.setProbability(tail, head, average);
+
+                // Calculate the sum of all the other probabilities besides
+                // the one we set
+                var sum = 0.0;
+                for (var other in WorkerState.Types) {
+                    if (other != tail) {
+                        sum += this.stateManager.getProbability(tail, other);
+                    }
+                }
+
+                // Calculate a contribution (defined as how much
+                // of a percentage of the total probability each takes up)
+                // and multiply the delta by this contribution.
+                // The product of this contribution and the delta will be added to the probability
+                // such that the entire delta is distributed across the other probabilities
+                // and it still adds up to 1.
+                for (var other in WorkerState.Types) {
+                    if (other != tail) {
+                        var currentProbability = this.stateManager.getProbability(tail, other);
+                        var result = currentProbability - (currentProbability / sum) * delta;
+                        this.stateManager.setProbability(tail, other, result);
+                    }
+                }
+            }
+        }
+    }
 }
-window.inherits(Worker, Model);
 
-Worker.SPEED = 0.1;
-
-Worker.prototype.update = function(workers) {
-	// this.updateMarkovChain(workers.getAll(this.x_, this.y_));
-	this.doStateAction();
-	if (this.canUpdateState_) {
-		this.stateManager_.update();
-		this.onStateChange();
-	}
-};
-
-
-Worker.prototype.onStateChange = function() {
-	var state =
-		this.states_[this.stateManager_.getCurrentState()];
-	var data = state.getData();
-	var type = state.getType();
-	if (data) {
-		switch (type) {
-			case WorkerState.Types.MOVE_TO:
-				PathGenerator.getInstance().
-					makePath(
-							this.x_,
-							this.y_,
-							data.x,
-							data.y,
-							function(path) {
-						data.iterator = path;
-						state.setData(data);
-					});
-				break;
-		}
-	}
-};
-
-
-Worker.prototype.doStateAction = function() {
-	var state =
-		this.states_[this.stateManager_.getCurrentState()];
-	var data = state.getData();
-	var type = state.getType();
-	if (data) {
-		switch (type) {
-			case WorkerState.Types.MOVE_TO:
-				if (data.iterator && data.iterator.length > 0) {
-					this.moveTowards(data.iterator);
-				} else {
-					this.currentWalkingDirection_ = null;
-				}
-				break;
-		}
-	}
-};
-
-
-Worker.prototype.moveTowards = function(pathIterator) {
-	this.currentWalkingDirection_ = pathIterator[0];
-	this.walkTimer_ += Worker.SPEED;
-	if (this.walkTimer_ >= 1) {
-		var direction = pathIterator.shift();
-		this.walkTimer_ = 0;
-		PathGenerator.getInstance().movePhysicalModel(this, direction);
-	}
-	this.notifyChange();
-};
-
-
-Worker.prototype.isSelected = function() {
-	return this.selected_;
-};
-
-
-Worker.prototype.onSelect = function() {
-	this.selected_ = true;
-	this.notifyChange();
-};
-
-
-Worker.prototype.onDeselect = function() {
-	this.selected_ = false;
-	this.notifyChange();
-};
-
-
-Worker.prototype.getDirection = function() {
-	return this.currentWalkingDirection_;
-};
-
-
-Worker.prototype.getMoveProgress = function() {
-	return this.walkTimer_;
-};
-
-
-Worker.prototype.getWidth = function() {
-	return 1;
-};
-
-
-Worker.prototype.getHeight = function() {
-	return 1;
-};
-
-
-Worker.prototype.getX = function() {
-	return this.x_;
-};
-
-
-Worker.prototype.getY = function() {
-	return this.y_;
-};
-
-
-Worker.prototype.setX = function(x) {
-	this.x_ = x;
-};
-
-
-Worker.prototype.setY = function(y) {
-	this.y_ = y;
-};
-
-
-Worker.prototype.setState = function(stateType, data, opt_probability) {
-	this.states_[stateType].setData(data);
-	if (opt_probability) {
-		this.stateManager_.setProbability(stateType, opt_probability);
-	}
-};
-
-
-Worker.prototype.getMarkovChain = function() {
-	return this.stateManager_;
-};
-
-
-Worker.prototype.updateMarkovChain = function(neighbors) {
-	for (var tail in WorkerState.Types) {
-		for (var head in WorkerState.Types) {
-			// Calculate an average probability matrix
-			var average = 0.0;
-			for (var i = 0; i < neighbors.length; i++) {
-				neighbor = neighbors[i];
-				average += neighbor.getMarkovChain().getProbability(tail, head);
-			}
-
-			// Set the current probability to the average, and calculate
-			// the delta needed to make this change.
-			var current = this.stateManager_.getProbability(tail, head);
-			average = (average + current) / (neighbors.length + 1.0);
-			var delta = average - current;
-			this.stateManager_.setProbability(tail, head, average);
-
-			// Calculate the sum of all the other probabilities besides
-			// the one we set
-			var sum = 0.0;
-			for (var other in WorkerState.Types) {
-				if (other != tail) {
-					sum += this.stateManager_.getProbability(tail, other);
-				}
-			}
-
-			// Calculate a contribution (defined as how much
-			// of a percentage of the total probability each takes up)
-			// and multiply the delta by this contribution.
-			// The product of this contribution and the delta will be added to the probability
-			// such that the entire delta is distributed across the other probabilities
-			// and it still adds up to 1.
-			for (var other in WorkerState.Types) {
-				if (other != tail) {
-					var currentProbability = this.stateManager_.getProbability(tail, other);
-					var result = currentProbability - (currentProbability / sum) * delta;
-					this.stateManager_.setProbability(tail, other, result);
-				}
-			}
-		}
-	}
-};
+export = Worker;

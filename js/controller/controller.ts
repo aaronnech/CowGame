@@ -1,16 +1,21 @@
-function Controller(game) {
-	this.setBindings();
+import Action = require('./action');
+
+class Controller {
+    constructor(game) {
+        this.setBindings();
+    }
+
+    public bind(action : Action, f) {
+        action.addBinding(this, f);
+    }
+
+    public clearBindings(action : Action) {
+        action.removeAllBindings(this);
+    }
+
+    public setBindings() {
+        throw new Error('Abstact Method called!');
+    }
 }
 
-
-Controller.prototype.bind = function(action, f) {
-	action.addBinding(this, f);
-};
-
-
-Controller.prototype.clearBindings = function(action) {
-	action.removeAllBindings(this);
-};
-
-
-Controller.prototype.setBindings = window.ABSTRACT_METHOD;
+export = Controller;

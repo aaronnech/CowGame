@@ -1,9 +1,16 @@
-function Resource(type) {
-	this.type_ = type;
-}
-window.inherits(Resource, Model);
+import Model = require('./model');
 
-Resource.Type = {
-	TREE : 0,
-	ROCK : 1
-};
+class Resource extends Model {
+    private type : number;
+    public static Type = {
+        TREE : 0,
+        ROCK : 1
+    };
+
+    constructor(type) {
+        super();
+        this.type = type;
+    }
+}
+
+export = Resource;

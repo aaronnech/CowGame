@@ -1,122 +1,122 @@
-function Camera(worldWidth, worldHeight, width, height) {
-	this.base = Model;
-	this.base.apply(this);
+import Model = require('./model');
 
-	this.x_ = 0;
-	this.y_ = 0;
-	this.width_ = width;
-	this.height_ = height;
-	this.worldWidth_ = worldWidth;
-	this.worldHeight_ = worldHeight;
+class Camera extends Model {
+    public static PANSPEED : number = 10;
 
-	this.attached_ = null;
+    private x : number;
+    private y : number;
+    private width : number;
+    private height : number;
+    private worldWidth : number;
+    private worldHeight : number;
+    private attached : any;
+
+    constructor(worldWidth, worldHeight, width, height) {
+        super();
+
+        this.x = 0;
+        this.y = 0;
+        this.width = width;
+        this.height = height;
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
+
+        this.attached = null;
+    }
+
+
+    public update() {
+        if (this.attached != null) {
+            var x = this.attached.getX();
+            var y = this.attached.getY();
+            if (!this.inView(x, y)) {
+
+            }
+        }
+    }
+
+
+    public attach(view) {
+        this.attached = view;
+        var x = this.attached.getX();
+        var y = this.attached.getY();
+        var deltaX = x - this.x - this.width / 2;
+        var deltaY = y - this.y - this.height / 2;
+        if (deltaX != 0) {
+            this.moveX(deltaX);
+        }
+        if (deltaY != 0) {
+            this.moveY(deltaY);
+        }
+    }
+
+    public detatch(view) {
+        this.attached = null;
+    }
+
+    public inView(x, y) {
+        return x >= this.x &&
+            y >= this.y &&
+            x <= this.x + this.width &&
+            y <= this.y + this.height;
+    }
+
+    public panUp() {
+        this.moveY(-Camera.PANSPEED);
+    }
+
+    public panDown() {
+        this.moveY(Camera.PANSPEED);
+    }
+
+
+    public panLeft() {
+        this.moveX(-Camera.PANSPEED);
+    }
+
+    public panRight() {
+        this.moveX(Camera.PANSPEED);
+    }
+
+    public getX() {
+        return this.x;
+    }
+
+    public getY() {
+        return this.y;
+    }
+
+    public getWidth() {
+        return this.width;
+    }
+
+    public getHeight() {
+        return this.height;
+    }
+
+    public moveX(x) {
+        var newX = this.x + x;
+        if (newX < 0) {
+            this.x = 0;
+        } else if (newX > this.worldWidth - this.width) {
+            this.x = this.worldWidth - this.width;
+        } else {
+            this.x = newX;
+        }
+        this.notifyChange();
+    }
+
+    public moveY(y) {
+        var newY = this.y + y;
+        if (newY < 0) {
+            this.y = 0;
+        } else if (newY > this.worldHeight - this.height) {
+            this.y = this.worldHeight - this.height;
+        } else {
+            this.y = newY;
+        }
+        this.notifyChange();
+    }
 }
-window.inherits(Camera, Model);
 
-
-// In pixels per frame
-Camera.PAN_SPEED = 10;
-
-
-Camera.prototype.update = function() {
-	if (this.attached_ != null) {
-		var x = this.attached_.getX();
-		var y = this.attached_.getY();
-		if (!this.inView(x, y)) {
-
-		}
-	}
-};
-
-
-Camera.prototype.attach = function(view) {
-	this.attached_ = view;
-	var x = this.attached_.getX();
-	var y = this.attached_.getY();
-	var deltaX = x - this.x_ - this.width_ / 2;
-	var deltaY = y - this.y_ - this.height_ / 2;
-	if (deltaX != 0) {
-		this.moveX(deltaX);
-	}
-	if (deltaY != 0) {
-		this.moveY(deltaY);
-	}
-};
-
-
-Camera.prototype.detatch = function(view) {
-	this.attached_ = null;
-};
-
-
-Camera.prototype.inView = function(x, y) {
-	return x >= this.x_ &&
-		y >= this.y_ &&
-		x <= this.x_ + this.width_ &&
-		y <= this.y_ + this.height_;
-};
-
-
-Camera.prototype.panUp = function() {
-	this.moveY(-Camera.PAN_SPEED);
-};
-
-
-Camera.prototype.panDown = function() {
-	this.moveY(Camera.PAN_SPEED);
-};
-
-
-Camera.prototype.panLeft = function() {
-	this.moveX(-Camera.PAN_SPEED);
-};
-
-
-Camera.prototype.panRight = function() {
-	this.moveX(Camera.PAN_SPEED);
-};
-
-Camera.prototype.getX = function() {
-	return this.x_;
-};
-
-
-Camera.prototype.getY = function() {
-	return this.y_;
-};
-
-
-Camera.prototype.getWidth = function() {
-	return this.width_;
-};
-
-
-Camera.prototype.getHeight = function() {
-	return this.height_;
-};
-
-
-Camera.prototype.moveX = function(x) {
-	var newX = this.x_ + x;
-	if (newX < 0) {
-		this.x_ = 0;
-	} else if (newX > this.worldWidth_ - this.width_) {
-		this.x_ = this.worldWidth_ - this.width_;
-	} else {
-		this.x_ = newX;
-	}
-	this.notifyChange();
-};
-
-
-Camera.prototype.moveY = function(y) {
-	var newY = this.y_ + y;
-	if (newY < 0) {
-		this.y_ = 0;
-	} else if (newY > this.worldHeight_ - this.height_) {
-		this.y_ = this.worldHeight_ - this.height_;
-	} else {
-		this.y_ = newY;
-	}
-	this.notifyChange();
-};
+export = Camera;

@@ -1,3 +1,5 @@
-function ViewModel() {
+class ViewModel {
 	
 }
+
+export = ViewModel;

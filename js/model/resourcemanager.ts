@@ -1,13 +1,27 @@
-function ResourceManager(mapModel) {
-	this.map_ = mapModel;
-	this.resources_ = new SpacialHash(
-		this.map_.getWidth(),
-		this.map_.getHeight(),
-		9);
-	this.resourcesArray_ = [];
-}
-window.inherits(ResourceManager, Model);
+import Model = require('./model');
+import Map = require('./map');
+import SpacialHash = require('../util/spacialhash');
+import Resource = require('./resource');
 
-ResourceManager.prototype.spawnInitial = function() {
-	// TODO: construct random Resources
-};
+class ResourceManager extends Model {
+    private map : Map;
+    private resources : SpacialHash;
+    private resourcesArray : Resource[];
+
+
+    constructor(mapModel : Map) {
+        super();
+        this.map = mapModel;
+        this.resources = new SpacialHash(
+            this.map.getWidth(),
+            this.map.getHeight(),
+            9);
+        this.resourcesArray = [];
+    }
+
+    public spawnInitial() {
+        // TODO :  construct random Resources
+    }
+}
+
+export = ResourceManager;

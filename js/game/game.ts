@@ -1,58 +1,67 @@
-function Game() {
-	this.running_ = false;
+class Game {
+    private running : boolean;
+    private oneFrameTime : any;
+    private lastUpdate : any;
 
-	this.oneFrameTime_ = null;
+    constructor() {
+        this.running = false;
+        this.oneFrameTime = null;
+        this.lastUpdate = null;
+    }
 
-	this.lastUpdate_ = null;
+    public onRender() {
+        throw new Error('Abstact Method called!');
+    }
+
+
+    public onUpdate(delta) {
+        throw new Error('Abstact Method called!');
+    }
+
+    public onStart() {
+        throw new Error('Abstact Method called!');
+    }
+
+    public onShutDown() {
+        throw new Error('Abstact Method called!');
+    }
+
+    private render() {
+        this.onRender();
+    }
+
+    private update(delta) {
+        this.onUpdate(delta);
+    }
+
+    public run(fps) {
+        var self = this;
+        function loop() {
+            var delta = 1;
+            if (self.lastUpdate) {
+                var now = Date.now();
+                delta = now - self.lastUpdate;
+                self.lastUpdate = now;
+            } else {
+                self.lastUpdate = Date.now();
+            }
+
+            if (!self.running) {
+                self.onShutDown();
+            } else {
+                setTimeout(function() {
+                    requestAnimationFrame(loop);
+                    self.update(delta);
+                    self.render();
+                }, self.oneFrameTime);
+            }
+        }
+
+        this.oneFrameTime = 1000 / fps;
+        this.running = true;
+        this.onStart();
+        loop();
+    }
 }
 
-Game.prototype.onRender = window.ABSTRACT_METHOD;
-
-
-Game.prototype.onUpdate = window.ABSTRACT_METHOD;
-
-
-Game.prototype.onStart = window.ABSTRACT_METHOD;
-
-
-Game.prototype.onShutDown = window.ABSTRACT_METHOD;
-
-
-Game.prototype.render_ = function() {
-	this.onRender();
-};
-
-
-Game.prototype.update_ = function(delta) {
-	this.onUpdate(delta);
-};
-
-
-Game.prototype.run = function(fps) {
-	var self = this;
-	function loop() {
-		var delta = 1;
-		if (self.lastUpdate_) {
-		    var now = Date.now();
-		    delta = now - self.lastUpdate_;
-		    self.lastUpdate_ = now;
-		} else {
-			self.lastUpdate_ = Date.now();
-		}
-
-		if (!self.running_) {
-			self.onShutDown();
-		} else {
-			setTimeout(function() {
-			    requestAnimationFrame(loop);
-				self.update_(delta);
-				self.render_();
-			}, self.oneFrameTime_);			
-		}
-	};
-
-	this.oneFrameTime_ = 1000 / fps;
-	this.running_ = true;
-	this.onStart();
-	loop();
-};
+export = Game;

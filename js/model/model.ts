@@ -1,28 +1,35 @@
-function Model() {
-	this.views_ = [];
+import PixiView = require('../view/pixiview');
+
+class Model {
+    private views : PixiView[];
+
+    constructor() {
+        this.views = [];
+    }
+
+    public subscribeView(view) {
+        this.views.push(view);
+    }
+
+    public removeView(view) {
+        var index = this.views.indexOf(view);
+        if (index != -1) {
+            this.views.splice(index, 1);
+        }
+    }
+
+    public notifyChange() {
+        for (var i = 0; i < this.views.length; i++) {
+            this.views[i].notify();
+        }
+    }
+
+    public dispose() {
+        for (var i = 0; i < this.views.length; i++) {
+            this.views[i].dispose();
+        }
+        this.views = [];
+    }
 }
 
-
-Model.prototype.subscribeView = function(view) {
-	this.views_.push(view);
-};
-
-Model.prototype.removeView = function(view) {
-	var index = this.views_.indexOf(view);
-	if (index != -1) {
-		this.views_.splice(index, 1);
-	}
-};
-
-Model.prototype.notifyChange = function() {
-	for (var i = 0; i < this.views_.length; i++) {
-		this.views_[i].notify();
-	}
-};
-
-Model.prototype.dispose = function() {
-	for (var i = 0; i < this.views_.length; i++) {
-		this.views_[i].dispose();
-	}
-	this.views_ = [];
-};
+export = Model;

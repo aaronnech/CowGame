@@ -1,24 +1,34 @@
-function WorkerState(type, data) {
-    this.data_ = data;
-    this.type_ = type;
-};
+import Model = require('./model');
 
-WorkerState.prototype.getData = function() {
-    return this.data_;
-};
+class WorkerState extends Model {
+    private data : any;
+    private type : any;
 
-WorkerState.prototype.setData = function(data) {
-    this.data_ = data;
-};
+    public static Types:any = {
+        MOVE_TO: "MOVE_TO"
+    }
 
-WorkerState.prototype.getType = function() {
-    return this.type_;
-};
+    constructor(type, data) {
+        super();
+        this.data = data;
+        this.type = type;
+    }
 
-WorkerState.prototype.setType = function(type) {
-    this.type_ = type;
-};
+    public getData = function() {
+        return this.data;
+    }
 
-WorkerState.Types = {
-    MOVE_TO : "MOVE_TO"
-};
+    public setData = function(data) {
+        this.data = data;
+    }
+
+    public getType = function() {
+        return this.type;
+    }
+
+    public setType = function(type) {
+        this.type = type;
+    }
+}
+
+export = WorkerState;

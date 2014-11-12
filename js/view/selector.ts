@@ -1,95 +1,105 @@
-function Selector(input, camera) {
-	this.input_ = input;
-	this.camera_ = camera;
-	this.lastXPosition_ = 0;
-	this.lastYPosition_ = 0;
-	this.selectables_ = [];
-	this.selected_ = [];
-};
+import Input = require('../input/input');
+import Camera = require('../model/camera');
+import MarkoViewModel = require('../viewmodel/markoviewmodel');
 
+class Selector {
+    private input : Input;
+    private camera : Camera;
+    private lastXPosition : number;
+    private lastYPosition : number;
+    private selectables : any;
+    private selected : any;
+    private dragging : boolean;
+    private mouseMoved : number;
 
-Selector.prototype.getLastMapClickX = function() {
-	return this.lastXPosition_;
-};
+    constructor(input, camera) {
+        this.dragging = false;
+        this.input = input;
+        this.camera = camera;
+        this.lastXPosition = 0;
+        this.lastYPosition = 0;
+        this.selectables = [];
+        this.selected = [];
+        this.mouseMoved = 0;
+    }
 
+    public getLastMapClickX() {
+        return this.lastXPosition;
+    }
 
-Selector.prototype.getLastMapClickY = function() {
-	return this.lastYPosition_;
-};
+    public getLastMapClickY() {
+        return this.lastYPosition;
+    }
 
+    public handleDragging() {
+        var x = this.input.getMouseX();
+        var y = this.input.getMouseY();
+        var down = this.input.isMouseDown(Input.Mouse.LEFT);
+        if (down && !this.dragging) {
+            this.onStartDrag();
+        } else if (down && this.mouseMoved) {
+            this.onDragMove();
+        } else if (!down && this.dragging) {
+            this.onFinishDrag();
+        }
+    }
 
-Selector.prototype.handleDragging = function() {
-	var x = this.input_.getMouseX();
-	var y = this.input_.getMouseY();
-	var down = this.input_.isMouseDown(Input.Mouse.LEFT);
-	if (down && !this.dragging_) {
-		this.onStartDrag_();
-	} else if (down && this.mouseMoved_) {
-		this.onDragMove_();
-	} else if (!down && this.dragging_) {
-		this.onFinishDrag_();
-	}
-};
+    public onStartDrag() {
+        this.dragging = true;
+    }
 
+    public onFinishDrag() {
+        this.dragging = false;
+    }
 
-Selector.prototype.onStartDrag_ = function() {
-	this.dragging_ = true;
-};
+    public onDragMove() {
+        this.mouseMoved = 0;
+    }
 
+    public addSelectables(collection) {
+        this.selectables.push(collection);
+    }
 
-Selector.prototype.onFinishDrag_ = function() {
-	this.dragging_ = false;
-};
+    public deselectAll() {
+        // deselect all
+        while (this.selected.length > 0) {
+            this.selected.pop().onDeselect();
+        }
+    }
 
+    public selectAtCoordinates(x, y) {
+        this.deselectAll();
 
-Selector.prototype.onDragMove_ = function() {
-	this.mouseMoved_ = false;
-};
+        // select new selectable
+        for (var i = 0; i < this.selectables.length; i++) {
+            var inArea = this.selectables[i].getAll(x, y);
+            for (var i = 0; i < inArea.length; i++) {
+                var candidate = inArea[i];
+                if (candidate.getX() == x &&
+                    candidate.getY() == y) {
+                    this.selected.push(candidate);
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
 
-
-Selector.prototype.addSelectables = function(collection) {
-	this.selectables_.push(collection);
-};
-
-
-Selector.prototype.deselectAll = function() {
-	// deselect all
-	while (this.selected_.length > 0) {
-		this.selected_.pop().onDeselect();
-	}
-};
-
-
-Selector.prototype.selectAtCoordinates = function(x, y) {
-	this.deselectAll();
-
-	// select new selectable
-	for (var i = 0; i < this.selectables_.length; i++) {
-		var inArea = this.selectables_[i].getAll(x, y);
-		for (var i = 0; i < inArea.length; i++) {
-			var candidate = inArea[i];
-			if(candidate.getX() == x &&
-				candidate.getY() == y) {
-				this.selected_.push(candidate);
-				return candidate;
-			}
-		}
-	}
-	return null;
+    public onClickMap() {
+        this.dragging = false;
+        var clickX = this.input.getMouseX();
+        var clickY = this.input.getMouseY();
+        clickX += this.camera.getX();
+        clickY += this.camera.getY();
+        clickX = Math.floor(clickX / MarkoViewModel.TILE_WIDTH);
+        clickY = Math.floor(clickY / MarkoViewModel.TILE_HEIGHT);
+        var selected = this.selectAtCoordinates(clickX, clickY);
+        if (selected) {
+            selected.onSelect();
+        }
+        this.lastXPosition = clickX;
+        this.lastYPosition = clickY;
+    }
 }
 
-Selector.prototype.onClickMap = function() {
-	this.dragging_ = false;
-	var clickX = this.input_.getMouseX();
-	var clickY = this.input_.getMouseY();
-	clickX += this.camera_.getX();
-	clickY += this.camera_.getY();
-	clickX = Math.floor(clickX / MarkoViewModel.TILE_WIDTH);
-	clickY = Math.floor(clickY / MarkoViewModel.TILE_HEIGHT);
-	var selected = this.selectAtCoordinates(clickX, clickY);
-	if (selected) {
-		selected.onSelect();
-	}
-	this.lastXPosition_ = clickX;
-	this.lastYPosition_ = clickY;
-};
+export = Selector;

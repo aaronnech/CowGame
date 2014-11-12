@@ -1,50 +1,61 @@
-function PixiView(models, pixiStage) {
-	this.models_ = models;
-	for (var i = 0; i < models.length; i++) {
-		this.models_[i].subscribeView(this);
-	}
+import Model = require('../model/model');
+import Camera = require('../model/camera');
 
-	this.pixiStage_ = pixiStage;
+class PixiView {
+    private models : Model[];
+    private pixiStage : any;
+    private pixiChild : any;
 
-	this.pixiChild_ = this.makePixiStageMember();
-	if (this.pixiChild_) {
-		this.pixiStage_.addChild(this.pixiChild_);
-	}
+    constructor(models, pixiStage) {
+        this.models = models;
+        for (var i = 0; i < models.length; i++) {
+            this.models[i].subscribeView(this);
+        }
+
+        this.pixiStage = pixiStage;
+
+        this.pixiChild = this.makePixiStageMember();
+        if (this.pixiChild) {
+            this.pixiStage.addChild(this.pixiChild);
+        }
+    }
+
+    public getModels() {
+        return this.models;
+    }
+
+    public getPixiStageMember() {
+        return this.pixiChild;
+    }
+
+    public redrawPixiStageMember() {
+        if (this.pixiChild) {
+            this.pixiStage.removeChild(this.pixiChild);
+        }
+        this.pixiChild = this.makePixiStageMember();
+        if (this.pixiChild) {
+            this.pixiStage.addChild(this.pixiChild);
+        }
+    }
+
+
+    public dispose() {
+        if (this.pixiChild) {
+            this.pixiStage.removeChild(this.pixiChild);
+        }
+        for (var i = 0; i < this.models.length; i++) {
+            this.models[i].removeView(this);
+        }
+    }
+
+
+    public makePixiStageMember() {
+        throw new Error('This method is abstract');
+    }
+
+    public notify() {
+        throw new Error('This method is abstract');
+    }
 }
 
-
-PixiView.prototype.getModels = function() {
-	return this.models_;
-};
-
-
-PixiView.prototype.getPixiStageMember = function() {
-	return this.pixiChild_;
-};
-
-
-PixiView.prototype.redrawPixiStageMember = function() {
-	if (this.pixiChild_) {
-		this.pixiStage_.removeChild(this.pixiChild_);
-	}
-	this.pixiChild_ = this.makePixiStageMember();
-	if (this.pixiChild_) {
-		this.pixiStage_.addChild(this.pixiChild_);
-	}
-};
-
-
-PixiView.prototype.dispose = function() {
-	if (this.pixiChild_) {
-		this.pixiStage_.removeChild(this.pixiChild_);
-	}
-	for (var i = 0; i < this.models_.length; i++) {
-		this.models_[i].removeView(this);
-	}
-};
-
-
-PixiView.prototype.makePixiStageMember = window.ABSTRACT_METHOD;
-
-
-PixiView.prototype.notify = window.ABSTRACT_METHOD;
+export = PixiView;
