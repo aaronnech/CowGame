@@ -2,6 +2,7 @@
 .idea/*
 *.js
 *.map
+!js/vendor/*
 
 # Created by https://www.gitignore.io
 
