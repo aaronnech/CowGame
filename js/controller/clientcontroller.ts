@@ -19,7 +19,9 @@ class ClientController extends Controller {
         this.bind(Action.ViewActions.PAN_LEFT, this.panCameraLeft);
         this.bind(Action.ViewActions.PAN_RIGHT, this.panCameraRight);
 
-        this.bind(Action.ViewActions.CLICK_MAP, this.clickMap);
+        this.bind(Action.ViewActions.MOUSE_UP_MAP, this.mouseUpMap);
+        this.bind(Action.ViewActions.MOUSE_DOWN_MAP, this.mouseDownMap);
+        this.bind(Action.ViewActions.RIGHT_CLICK_MAP, this.rightClickMap);
     }
 
     public onRender() {
@@ -46,8 +48,16 @@ class ClientController extends Controller {
         this.viewModel.panCameraRight();
     }
 
-    public clickMap() {
-        this.viewModel.clickMap();
+    public mouseUpMap() {
+        this.viewModel.mouseUpMap();
+    }
+
+    public mouseDownMap() {
+        this.viewModel.mouseDownMap();
+    }
+
+    public rightClickMap() {
+        this.viewModel.rightClickMap();
     }
 }
 

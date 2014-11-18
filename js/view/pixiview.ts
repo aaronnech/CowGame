@@ -51,10 +51,12 @@ class PixiView {
 
     public makePixiStageMember() {
         throw new Error('This method is abstract');
+        return null;
     }
 
     public notify() {
         throw new Error('This method is abstract');
+        return null;
     }
 }
 

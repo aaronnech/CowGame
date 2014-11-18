@@ -31,6 +31,10 @@ class Input {
     private mouseDownState : boolean[];
     private mouseHitState : boolean[];
     private mouseHitBindings : any;
+    private mouseDownBindings : any;
+    private mouseUpBindings : any;
+    private mouseDownOccurred : boolean;
+    private mouseUpOccurred : boolean;
     private mouseX : number;
     private mouseY : number;
 
@@ -47,10 +51,15 @@ class Input {
         this.mouseMovedForClick = 0;
         this.mouseDownState = [false, false]
         this.mouseHitState = [false, false];
+        this.mouseDownOccurred = false;
+        this.mouseUpOccurred = false;
         this.mouseHitBindings = [
             [],
             []
         ];
+
+        this.mouseDownBindings = [];
+        this.mouseUpBindings = [];
         this.mouseX = 0;
         this.mouseY = 0;
 
@@ -69,17 +78,35 @@ class Input {
 
             this.keyDownState[mapKey] = false;
             this.keyHitState[mapKey] = true;
+            console.log('KEY UP EVENT');
+        });
+
+        this.addBrowserEventListener(this.canvas, 'contextmenu', (e) => {
+            console.log('CONTEXT MENU EVENT');
+            this.mouseHitState[Input.Mouse.RIGHT] = true;
+            e.preventDefault();
+            return false;
         });
 
         this.addBrowserEventListener(this.canvas, 'mousedown', (e) => {
-            this.mouseDownState[Input.Mouse.LEFT] = true;
-            this.mouseMovedForClick = 0;
+            if (e.button == 0) {
+                this.mouseDownState[Input.Mouse.LEFT] = true;
+                this.mouseMovedForClick = 0;
+
+                this.mouseDownOccurred = true;
+                console.log('MOUSE DOWN EVENT ' + e.button);
+            }
         });
 
         this.addBrowserEventListener(this.canvas, 'mouseup', (e) => {
-            this.mouseDownState[Input.Mouse.LEFT] = false;
-            if (this.mouseMovedForClick < Input.CLICK_THRESHOLD) {
-                this.mouseHitState[Input.Mouse.LEFT] = true;
+            if (e.button == 0) {
+                this.mouseDownState[Input.Mouse.LEFT] = false;
+                if (this.mouseMovedForClick < Input.CLICK_THRESHOLD) {
+                    this.mouseHitState[Input.Mouse.LEFT] = true;
+                }
+
+                this.mouseUpOccurred = true;
+                console.log('MOUSE UP EVENT');
             }
         });
 
@@ -166,8 +193,28 @@ class Input {
                 bindings[i].action.fire(this, bindings[i].data);
             }
         }
+
+        // Handle mouse up events
+        if (this.mouseUpOccurred && this.mouseUpBindings) {
+            var bindings = this.mouseUpBindings;
+            for (var i = 0; i < bindings.length; i++) {
+                bindings[i].action.fire(this, bindings[i].data);
+            }
+        }
+
+        // Handle mouse down events
+        if (this.mouseDownOccurred && this.mouseDownBindings) {
+            var bindings = this.mouseDownBindings;
+            for (var i = 0; i < bindings.length; i++) {
+                bindings[i].action.fire(this, bindings[i].data);
+            }
+        }
+
+        // Reset State
         this.mouseHitState[Input.Mouse.LEFT] = false;
         this.mouseHitState[Input.Mouse.RIGHT] = false;
+        this.mouseDownOccurred = false;
+        this.mouseUpOccurred = false;
     }
 
     public bindMapKeyToAction(mapKey, map, action, data) {
@@ -177,16 +224,21 @@ class Input {
         map[mapKey].push({'action': action, 'data': data});
     }
 
+    public bindLeftMouseDownAction = function (action, data) {
+        this.bindMapKeyToAction(0, [this.mouseDownBindings], action, data);
+    }
+
+    public bindLeftMouseUpAction = function (action, data) {
+        this.bindMapKeyToAction(0, [this.mouseUpBindings], action, data);
+    }
 
     public bindMouseHitAction = function (mouse, action, data) {
         this.bindMapKeyToAction(mouse, this.mouseHitBindings, action, data);
     }
 
-
     public bindKeyHitAction = function (key, action, data) {
         this.bindMapKeyToAction(key, this.keyHitBindings, action, data);
     }
-
 
     public bindKeyDownAction = function (key, action, data) {
         this.bindMapKeyToAction(key, this.keyDownBindings, action, data);

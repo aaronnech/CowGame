@@ -24,6 +24,7 @@ class Map extends Model {
             }
         }
         console.log('map constructed with ' + this.tiles.length + ' tiles');
+        console.log('map dimensions: (w,h) = (' + this.width + ',' + this.height + ')');
     }
 
     public getWidth() {
@@ -65,11 +66,11 @@ class Map extends Model {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
-    private toTileX(x) {
+    public toTileX(x) {
         return Math.floor(x / this.tileWidth);
     }
 
-    private toTileY(y) {
+    public toTileY(y) {
         return Math.floor(y / this.tileHeight);
     }
 

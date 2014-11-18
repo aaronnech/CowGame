@@ -7,9 +7,9 @@ class CameraView extends PixiView {
     private camera : Camera;
 
     constructor(cameraModel : Camera, pixiStage : any, world : any) {
-        super([cameraModel], pixiStage);
         this.world = world;
         this.camera = cameraModel;
+        super([cameraModel], pixiStage);
     }
 
     public makePixiStageMember() {

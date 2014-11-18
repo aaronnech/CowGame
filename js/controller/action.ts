@@ -8,7 +8,7 @@ class Action {
         UPDATE : new Action(),
         STOP : new Action(),
         START : new Action()
-    }
+    };
 
     public static ViewActions : any = {
         PAN_RIGHT : new Action(),
@@ -19,8 +19,10 @@ class Action {
         MOVE_LEFT : new Action(),
         MOVE_UP : new Action(),
         MOVE_DOWN : new Action(),
-        CLICK_MAP : new Action()
-    }
+        MOUSE_UP_MAP : new Action(),
+        MOUSE_DOWN_MAP : new Action(),
+        RIGHT_CLICK_MAP : new Action()
+    };
 
     constructor() {
         this.bindings = [];

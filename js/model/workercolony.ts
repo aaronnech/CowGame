@@ -2,6 +2,7 @@ import Model = require('./model');
 import Map = require('./map');
 import SpacialHash = require('../util/spacialhash');
 import Worker = require('./worker');
+import Constants = require('../util/constants');
 
 class WorkerColony extends Model {
 
@@ -15,7 +16,7 @@ class WorkerColony extends Model {
         this.workers = new SpacialHash(
             this.map.getWidth(),
             this.map.getHeight(),
-            9);
+            Constants.BUCKET_SIZE);
         this.workersArray = [];
     }
 

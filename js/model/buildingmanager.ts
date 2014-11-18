@@ -1,6 +1,8 @@
 import SpacialHash = require('../util/spacialhash');
 import Map = require('./map');
 import Model = require('./model');
+import Building = require('./building');
+import Constants = require('../util/constants');
 
 class BuildingManager extends Model {
     private map : Map;
@@ -13,8 +15,14 @@ class BuildingManager extends Model {
         this.buildings = new SpacialHash(
             this.map.getWidth(),
             this.map.getHeight(),
-            9);
+            Constants.BUCKET_SIZE);
         this.buildingsArray = [];
+    }
+
+
+    public addBuilding(buildingModel : Building) {
+        this.buildings.add(buildingModel.getX(), buildingModel.getY(), buildingModel);
+        this.buildingsArray.push(buildingModel);
     }
 }
 

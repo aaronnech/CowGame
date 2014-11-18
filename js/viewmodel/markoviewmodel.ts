@@ -10,21 +10,13 @@ import WorkerView = require('../view/workerview');
 import WorkerColony = require('../model/workercolony');
 import ResourceManager = require('../model/resourcemanager');
 import BuildingManager = require('../model/buildingmanager');
+import GrainSupply = require('../model/grainsupply');
+import GrainSupplyView = require('../view/grainsupplyview');
 import Selector = require('../view/selector');
 import PathGenerator = require('../util/pathgenerator');
+import Constants = require('../util/constants');
 
 class MarkoViewModel extends ViewModel {
-    public static DISPLAY_WIDTH : number = 800;
-    public static DISPLAY_HEIGHT : number = 600;
-    public static WORLD_WIDTH : number = 16384;
-    public static WORLD_HEIGHT : number = 16384;
-    public static TILE_HEIGHT : number = 32;
-    public static TILE_WIDTH : number = 32;
-    public static NUMBER_OF_X_TILES : number =
-        MarkoViewModel.WORLD_WIDTH / MarkoViewModel.TILE_WIDTH;
-    public static NUMBER_OF_Y_TILES : number =
-        MarkoViewModel.WORLD_HEIGHT / MarkoViewModel.TILE_HEIGHT;
-
     private pixiStage : any;
     private pixiRenderer : any;
     private pixiWorld : any;
@@ -53,7 +45,7 @@ class MarkoViewModel extends ViewModel {
         // Setup renderer
         this.pixiStage = new PIXI.Stage(0x339933);
         this.pixiRenderer = PIXI.autoDetectRenderer(
-            MarkoViewModel.DISPLAY_WIDTH, MarkoViewModel.DISPLAY_HEIGHT);
+            Constants.DISPLAY_WIDTH, Constants.DISPLAY_HEIGHT);
         this.pixiWorld = new PIXI.DisplayObjectContainer();
         this.pixiStage.addChild(this.pixiWorld);
         document.body.appendChild(this.pixiRenderer.view);
@@ -65,20 +57,22 @@ class MarkoViewModel extends ViewModel {
         console.log('INITALIZING CAMERA..');
         // Camera
         this.camera = new Camera(
-            MarkoViewModel.WORLD_WIDTH,
-            MarkoViewModel.WORLD_HEIGHT,
-            MarkoViewModel.DISPLAY_WIDTH,
-            MarkoViewModel.DISPLAY_HEIGHT);
+            Constants.TILE_WIDTH,
+            Constants.TILE_HEIGHT,
+            Constants.WORLD_WIDTH,
+            Constants.WORLD_HEIGHT,
+            Constants.DISPLAY_WIDTH,
+            Constants.DISPLAY_HEIGHT);
         this.cameraView = new CameraView(this.camera, this.pixiStage, this.pixiWorld);
         var cameraContainer = this.cameraView.getPixiStageMember();
 
         console.log('INITIALIZING MAP..');
         // Map
         this.map = new Map(
-            MarkoViewModel.NUMBER_OF_X_TILES,
-            MarkoViewModel.NUMBER_OF_Y_TILES,
-            MarkoViewModel.TILE_HEIGHT,
-            MarkoViewModel.TILE_WIDTH);
+            Constants.NUMBER_OF_X_TILES,
+            Constants.NUMBER_OF_Y_TILES,
+            Constants.TILE_HEIGHT,
+            Constants.TILE_WIDTH);
         this.mapView = new MapView(this.map, this.camera, this.pixiWorld);
 
         console.log('CREATING PATH GENERATOR..');
@@ -87,9 +81,9 @@ class MarkoViewModel extends ViewModel {
         console.log('SPAWNING COLONY..');
         // Place a colony down (test for now)
         this.colony = new WorkerColony(this.map);
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 20; i++) {
             var worker = new Worker();
-            var workerView = new WorkerView(worker, this.camera, this.pixiWorld);
+            new WorkerView(worker, this.camera, this.pixiWorld);
             this.colony.addWorker(worker);
             worker.onStateChange();
         }
@@ -103,15 +97,21 @@ class MarkoViewModel extends ViewModel {
         console.log('CREATING BUILDING MANAGER..');
         this.buildingManager = new BuildingManager(this.map);
 
+        console.log('ADDING STARTER GRAINARY BUILDING..');
+        var grainary = new GrainSupply();
+        new GrainSupplyView(grainary, this.camera, this.pixiWorld);
+        this.buildingManager.addBuilding(grainary);
+
         console.log('INITIALIZING SELECT HANDLER..');
         // Create select handler
-        this.selector = new Selector(this.input, this.camera);
+        this.selector = new Selector(this.input, this.camera, this.pixiStage);
         this.selector.addSelectables(this.colony.getWorkers());
 
         console.log('BINDING INPUT..');
         // Map interaction
-        this.input.bindMouseHitAction(
-            Input.Mouse.LEFT, Action.ViewActions.CLICK_MAP, undefined);
+        this.input.bindLeftMouseDownAction(Action.ViewActions.MOUSE_DOWN_MAP, undefined);
+        this.input.bindLeftMouseUpAction(Action.ViewActions.MOUSE_UP_MAP, undefined);
+        this.input.bindMouseHitAction(Input.Mouse.RIGHT, Action.ViewActions.RIGHT_CLICK_MAP, undefined);
 
         // Camera panning
         this.input.bindKeyDownAction(
@@ -123,20 +123,10 @@ class MarkoViewModel extends ViewModel {
         this.input.bindKeyDownAction(
             Input.Keys.LEFT, Action.ViewActions.PAN_LEFT, undefined);
 
-        // Hero moving
-        this.input.bindKeyDownAction(
-            Input.Keys.W, Action.ViewActions.MOVE_UP, undefined);
-        this.input.bindKeyDownAction(
-            Input.Keys.S, Action.ViewActions.MOVE_DOWN, undefined);
-        this.input.bindKeyDownAction(
-            Input.Keys.D, Action.ViewActions.MOVE_RIGHT, undefined);
-        this.input.bindKeyDownAction(
-            Input.Keys.A, Action.ViewActions.MOVE_LEFT, undefined);
-
         console.log('ATTACHING CAMERA..');
         // Move the camera to the starting position
-        this.camera.moveX(MarkoViewModel.WORLD_WIDTH / 2);
-        this.camera.moveY(MarkoViewModel.WORLD_HEIGHT / 2);
+        this.camera.moveX(Constants.WORLD_WIDTH / 2);
+        this.camera.moveY(Constants.WORLD_HEIGHT / 2);
 
         console.log('READY..');
     }
@@ -152,10 +142,26 @@ class MarkoViewModel extends ViewModel {
         this.input.update();
         this.colony.update();
         this.camera.update();
+        this.selector.handleDragging();
     }
 
-    public clickMap() {
-        this.selector.onClickMap();
+    public rightClickMap() {
+        // Do something telling selected units to move
+        var selected = this.selector.getSelected();
+        var x = this.map.toTileX(this.input.getMouseX() + this.camera.getX());
+        var y = this.map.toTileY(this.input.getMouseY() + this.camera.getY());
+        console.log('right click at (' + x + ',' + y + ')');
+        for (var i = 0; i < selected.length; i++) {
+            selected[i].startMove(x, y);
+        }
+    }
+
+    public mouseDownMap() {
+        this.selector.onMouseDown();
+    }
+
+    public mouseUpMap() {
+        this.selector.onMouseUp();
     }
 
     public panCameraLeft() {

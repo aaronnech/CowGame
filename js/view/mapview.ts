@@ -7,9 +7,9 @@ class MapView extends PixiView{
     private camera : Camera;
 
     constructor(mapModel : Map, cameraModel : Camera, pixiStage) {
-        super([mapModel, cameraModel], pixiStage);
         this.map = mapModel;
         this.camera = cameraModel;
+        super([mapModel, cameraModel], pixiStage);
     }
 
     public makePixiStageMember() {

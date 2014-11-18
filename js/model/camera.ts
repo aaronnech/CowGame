@@ -1,7 +1,8 @@
 import Model = require('./model');
+import PhysicalModel = require('./physicalmodel');
 
 class Camera extends Model {
-    public static PANSPEED : number = 10;
+    public static PAN_SPEED : number = 10;
 
     private x : number;
     private y : number;
@@ -9,9 +10,11 @@ class Camera extends Model {
     private height : number;
     private worldWidth : number;
     private worldHeight : number;
+    private tileWidth : number;
+    private tileHeight :number;
     private attached : any;
 
-    constructor(worldWidth, worldHeight, width, height) {
+    constructor(tileWidth, tileHeight, worldWidth, worldHeight, width, height) {
         super();
 
         this.x = 0;
@@ -20,10 +23,11 @@ class Camera extends Model {
         this.height = height;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
 
         this.attached = null;
     }
-
 
     public update() {
         if (this.attached != null) {
@@ -61,21 +65,31 @@ class Camera extends Model {
             y <= this.y + this.height;
     }
 
+    public modelInView(model : PhysicalModel) {
+        var x = model.getX() * this.tileWidth;
+        var y = model.getY() * this.tileHeight;
+        var w = model.getWidth() * this.tileWidth;
+        var h = model.getHeight() * this.tileHeight;
+        return x + w >= this.x &&
+            y + h >= this.y &&
+            x <= this.x + this.width &&
+            y <= this.y + this.height;
+    }
+
     public panUp() {
-        this.moveY(-Camera.PANSPEED);
+        this.moveY(-Camera.PAN_SPEED);
     }
 
     public panDown() {
-        this.moveY(Camera.PANSPEED);
+        this.moveY(Camera.PAN_SPEED);
     }
 
-
     public panLeft() {
-        this.moveX(-Camera.PANSPEED);
+        this.moveX(-Camera.PAN_SPEED);
     }
 
     public panRight() {
-        this.moveX(Camera.PANSPEED);
+        this.moveX(Camera.PAN_SPEED);
     }
 
     public getX() {

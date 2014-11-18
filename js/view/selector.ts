@@ -1,59 +1,97 @@
 import Input = require('../input/input');
 import Camera = require('../model/camera');
-import MarkoViewModel = require('../viewmodel/markoviewmodel');
+import PixiView = require('./pixiview');
+import Constants = require('../util/constants');
 
-class Selector {
+class Selector extends PixiView {
+    private static CLICK_THRESHOLD : number = 10;
+
     private input : Input;
     private camera : Camera;
-    private lastXPosition : number;
-    private lastYPosition : number;
+    private startX : number;
+    private startY : number;
+    private currentX : number;
+    private currentY : number;
     private selectables : any;
     private selected : any;
     private dragging : boolean;
-    private mouseMoved : number;
 
-    constructor(input, camera) {
+    constructor(input, camera, pixiStage) {
         this.dragging = false;
         this.input = input;
         this.camera = camera;
-        this.lastXPosition = 0;
-        this.lastYPosition = 0;
+        this.startX = 0;
+        this.startY = 0;
         this.selectables = [];
         this.selected = [];
-        this.mouseMoved = 0;
+        super([camera], pixiStage);
     }
 
-    public getLastMapClickX() {
-        return this.lastXPosition;
+    public makePixiStageMember() {
+        if (this.dragging) {
+            var graphics = new PIXI.Graphics();
+            var color = 0xFF0000;
+            graphics.lineStyle(5, color);
+            graphics.drawRect(
+                    this.startX,
+                    this.startY,
+                    this.currentX - this.startX,
+                    this.currentY - this.startY);
+            return graphics;
+        }
+        return null;
     }
 
-    public getLastMapClickY() {
-        return this.lastYPosition;
+    public notify() {
+        // Do something?
     }
 
     public handleDragging() {
-        var x = this.input.getMouseX();
-        var y = this.input.getMouseY();
-        var down = this.input.isMouseDown(Input.Mouse.LEFT);
-        if (down && !this.dragging) {
-            this.onStartDrag();
-        } else if (down && this.mouseMoved) {
-            this.onDragMove();
-        } else if (!down && this.dragging) {
-            this.onFinishDrag();
+        if (this.dragging) {
+            var x = this.input.getMouseX();
+            var y = this.input.getMouseY();
+            this.onDragMove(x, y);
         }
     }
 
     public onStartDrag() {
+        this.startX = this.input.getMouseX();
+        this.startY = this.input.getMouseY();
         this.dragging = true;
     }
 
     public onFinishDrag() {
         this.dragging = false;
+        this.redrawPixiStageMember();
+        if ((Math.abs(this.currentX - this.startX) +
+             Math.abs(this.currentY - this.startY)) <= Selector.CLICK_THRESHOLD) {
+            console.log("CLICK NOT DRAG");
+            var x = Math.floor((this.startX + this.camera.getX()) / Constants.TILE_WIDTH);
+            var y = Math.floor((this.startY + this.camera.getY()) / Constants.TILE_HEIGHT);
+            var selected = this.selectAtCoordinates(x, y);
+            if (selected) {
+                selected.onSelect();
+            }
+        } else {
+            console.log("DRAG NOT CLICK");
+            var x1 = Math.floor((this.startX + this.camera.getX()) / Constants.TILE_WIDTH);
+            var y1 = Math.floor((this.startY + this.camera.getY()) / Constants.TILE_HEIGHT);
+            var x2 = Math.floor((this.currentX + this.camera.getX()) / Constants.TILE_WIDTH);
+            var y2 = Math.floor((this.currentY + this.camera.getY()) / Constants.TILE_HEIGHT);
+            this.selectAtArea(x1, y1, x2, y2);
+        }
     }
 
-    public onDragMove() {
-        this.mouseMoved = 0;
+    public onDragMove(currentX, currentY) {
+        if (currentX != this.currentX || currentY != this.currentY) {
+            this.currentX = currentX;
+            this.currentY = currentY;
+            this.redrawPixiStageMember();
+        }
+    }
+
+    public getSelected() {
+        return this.selected;
     }
 
     public addSelectables(collection) {
@@ -85,20 +123,38 @@ class Selector {
         return null;
     }
 
-    public onClickMap() {
-        this.dragging = false;
-        var clickX = this.input.getMouseX();
-        var clickY = this.input.getMouseY();
-        clickX += this.camera.getX();
-        clickY += this.camera.getY();
-        clickX = Math.floor(clickX / MarkoViewModel.TILE_WIDTH);
-        clickY = Math.floor(clickY / MarkoViewModel.TILE_HEIGHT);
-        var selected = this.selectAtCoordinates(clickX, clickY);
-        if (selected) {
-            selected.onSelect();
+    public selectAtArea(x1, y1, x2, y2) {
+        this.deselectAll();
+
+        var minX = Math.min(x1, x2);
+        var minY = Math.min(y1, y2);
+        var maxX = Math.max(x1, x2);
+        var maxY = Math.max(y1, y2);
+
+        // select new selectable
+        for (var i = 0; i < this.selectables.length; i++) {
+            var inArea = this.selectables[i].getAll(x1, y1).concat(this.selectables[i].getAll(x2, y2));
+            for (var i = 0; i < inArea.length; i++) {
+                var candidate = inArea[i];
+                if (candidate.getX() >= minX && candidate.getX() <= maxX &&
+                    candidate.getY() >= minY && candidate.getY() <= maxY) {
+                    this.selected.push(candidate);
+                    candidate.onSelect();
+                }
+            }
         }
-        this.lastXPosition = clickX;
-        this.lastYPosition = clickY;
+    }
+
+    public onMouseDown() {
+        if (!this.dragging) {
+            this.onStartDrag();
+        }
+    }
+
+    public onMouseUp() {
+        if (this.dragging) {
+            this.onFinishDrag();
+        }
     }
 }
 

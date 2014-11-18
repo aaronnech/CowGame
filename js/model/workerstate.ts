@@ -4,9 +4,10 @@ class WorkerState extends Model {
     private data : any;
     private type : any;
 
-    public static Types:any = {
-        MOVE_TO: "MOVE_TO"
-    }
+    public static Types : any = {
+        MOVE_TO : "MOVE_TO",
+        DO_NOTHING : "DO_NOTHING"
+    };
 
     constructor(type, data) {
         super();

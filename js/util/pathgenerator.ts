@@ -1,3 +1,4 @@
+/// <reference path="../def/easystar.d.ts" />
 import Model = require('../model/model');
 import Map = require('../model/map');
 
@@ -10,11 +11,10 @@ class PathGenerator {
         MOVE_EAST: 3
     };
 
-    private map:Map;
-    private pathFinder:any;
+    private map : Map;
+    private pathFinder : any;
 
     public constructor(mapModel) {
-        var self = this;
         // TODO: if other objects go on the map
         // then also pass to constructor to use in grid building.
         if (PathGenerator.instance) {
@@ -24,7 +24,9 @@ class PathGenerator {
         this.map = mapModel;
 
         console.log('constructing path finder..');
-        this.pathFinder = null;
+        this.pathFinder = new EasyStar.js();
+        this.pathFinder.setAcceptableTiles([0]);
+        this.pathFinder.setIterationsPerCalculation(1000);
 
         console.log('Building collision map..');
         this.updateCollisionMap();
@@ -34,7 +36,7 @@ class PathGenerator {
     }
 
 
-    public static getInstance(optmapModel) {
+    public static getInstance(optmapModel? : any) {
         if (PathGenerator.instance) {
             return PathGenerator.instance;
         }
@@ -68,46 +70,54 @@ class PathGenerator {
 
     public updateCollisionMap() {
         // TODO: use buildCollisionMap to hook up pathfinder.
+        this.pathFinder.setGrid(this.buildCollisionMap());
     }
 
 
     public makePath(x1, y1, x2, y2, callback) {
         // Shortest path algorithm here..
         // return a path iterator.
+        console.log('checking isInMap('+ x1 + ',' + y1 + ') && checking isInMap('+ x2 + ',' + y2 + ')');
         if (this.map.isInMap(x1, y1) &&
             this.map.isInMap(x2, y2)) {
-            // this.pathFinder.findPath(x1, y1, x2, y2, function(path) {
-            // 	console.log('path calculated from ' + x1 + ',' + y1 + ' to ' + x2 + ',' + y2);
-            //     if (path === null) {
-            //         callback(null);
-            //     } else {
-            //     	var result = [];
-            //     	var current = {x : x1, y : y1}
-            //     	for (var i = 0; i < path.length; i++) {
-            //     		var next = path[i];
-            //     		// check if horizontal or vertical
-            //     		if(current.x - next.x != 0) {
-            //     			if (current.x > next.x) {
-            //     				result.push(
-            //     					PathGenerator.ManhattanDirection.MOVEWEST);
-            //     			} else {
-            //     				result.push(
-            //     					PathGenerator.ManhattanDirection.MOVEEAST);
-            //     			}
-            //     		} else {
-            //     			if (current.y > next.y) {
-            //     				result.push(
-            //     					PathGenerator.ManhattanDirection.MOVENORTH);
-            //     			} else {
-            //     				result.push(
-            //     					PathGenerator.ManhattanDirection.MOVESOUTH);
-            //     			}
-            //     		}
-            //     		current = next;
-            //     	}
-            //     	callback(result);
-            //     }
-            // });
+            console.log('calculating path in MakePath');
+            this.pathFinder.findPath(x1, y1, x2, y2, function(path) {
+            	console.log('path calculated from ' + x1 + ',' + y1 + ' to ' + x2 + ',' + y2);
+                 if (path === null) {
+                     callback(null);
+                 } else {
+                 	var result = [];
+                 	var current = {x : x1, y : y1}
+                 	for (var i = 0; i < path.length; i++) {
+                 		var next = path[i];
+                 		// check if horizontal or vertical
+                 		if(current.x - next.x != 0) {
+                 			if (current.x > next.x) {
+                 				result.push(
+                 					PathGenerator.ManhattanDirection.MOVE_WEST);
+                 			} else {
+                 				result.push(
+                 					PathGenerator.ManhattanDirection.MOVE_EAST);
+                 			}
+                 		} else {
+                 			if (current.y > next.y) {
+                 				result.push(
+                 					PathGenerator.ManhattanDirection.MOVE_NORTH);
+                 			} else {
+                 				result.push(
+                 					PathGenerator.ManhattanDirection.MOVE_SOUTH);
+                 			}
+                 		}
+                 		current = next;
+                 	}
+
+                    // EasyStar JS Result is off by one?
+                    result.shift();
+
+                 	callback(result);
+                 }
+            });
+            this.pathFinder.calculate();
         }
     }
 

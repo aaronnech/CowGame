@@ -2,8 +2,10 @@ import Model = require('./model');
 import MarkovChain = require('../util/markovchain');
 import PathGenerator = require('../util/pathgenerator');
 import WorkerState = require('./workerstate');
+import SelectableModel = require('./selectablemodel');
+import PhysicalModel = require('./physicalmodel');
 
-class Worker extends Model {
+class Worker extends Model implements SelectableModel, PhysicalModel {
     public static SPEED : number = 0.1;
 
     private selected : boolean;
@@ -32,7 +34,7 @@ class Worker extends Model {
         this.currentWalkingDirection = null;
         this.walkTimer = 0;
 
-        // Markov chain decision making state
+        // Markov chain decision making state manager
         this.canUpdateState = false;
         this.states = {}
         for (var key in WorkerState.Types) {
@@ -40,21 +42,21 @@ class Worker extends Model {
         }
         this.stateManager = new MarkovChain(Object.keys(WorkerState.Types));
 
-        // Test move (remove later)
-        var stateName = WorkerState.Types.MOVETO;
-        this.states[stateName].setData({x :  10, y :  10});
+        // Do nothing initially
+        var stateName = WorkerState.Types.DO_NOTHING;
+        this.states[stateName].setData(undefined);
         this.stateManager.setCurrentState(stateName);
+        this.onStateChange();
     }
 
     public update(workers) {
         // this.updateMarkovChain(workers.getAll(this.x, this.y));
-        this.doStateAction();
+        this.doStateAction(workers);
         if (this.canUpdateState) {
-            this.stateManager.update();
-            this.onStateChange();
+            // this.stateManager.update();
+            // this.onStateChange();
         }
     }
-
 
     public onStateChange() {
         var state =
@@ -63,31 +65,36 @@ class Worker extends Model {
         var type = state.getType();
         if (data) {
             switch (type) {
-                case WorkerState.Types.MOVETO : 
-//                    PathGenerator.getInstance().
-//                        makePath(
-//                        this.x,
-//                        this.y,
-//                        data.x,
-//                        data.y,
-//                        function (path) {
-//                            data.iterator = path;
-//                            state.setData(data);
-//                        });
+                case WorkerState.Types.DO_NOTHING:
+                    break;
+                case WorkerState.Types.MOVE_TO :
+                    console.log("Setting path!");
+                    PathGenerator.getInstance().
+                        makePath(
+                        this.x,
+                        this.y,
+                        data.x,
+                        data.y,
+                        (path) => {
+                            console.log("calculated!");
+                            data.iterator = path;
+                            state.setData(data);
+                        });
                     break;
             }
         }
     }
 
-
-    public doStateAction() {
+    public doStateAction(workers) {
         var state =
             this.states[this.stateManager.getCurrentState()];
         var data = state.getData();
         var type = state.getType();
         if (data) {
             switch (type) {
-                case WorkerState.Types.MOVETO : 
+                case WorkerState.Types.DO_NOTHING:
+                    break;
+                case WorkerState.Types.MOVE_TO :
                     if (data.iterator && data.iterator.length > 0) {
                         this.moveTowards(data.iterator);
                     } else {
@@ -98,77 +105,64 @@ class Worker extends Model {
         }
     }
 
-
     public moveTowards(pathIterator) {
         this.currentWalkingDirection = pathIterator[0];
         this.walkTimer += Worker.SPEED;
         if (this.walkTimer >= 1) {
             var direction = pathIterator.shift();
             this.walkTimer = 0;
-            // PathGenerator.getInstance().movePhysicalModel(this, direction);
+            PathGenerator.getInstance().movePhysicalModel(this, direction);
         }
         this.notifyChange();
     }
 
-
     public isSelected() {
         return this.selected;
     }
-
 
     public onSelect() {
         this.selected = true;
         this.notifyChange();
     }
 
-
     public onDeselect() {
         this.selected = false;
         this.notifyChange();
     }
 
-
     public getDirection() {
         return this.currentWalkingDirection;
     }
-
 
     public getMoveProgress() {
         return this.walkTimer;
     }
 
-
     public getWidth() {
         return 1;
     }
-
 
     public getHeight() {
         return 1;
     }
 
-
     public getX() {
         return this.x;
     }
-
 
     public getY() {
         return this.y;
     }
 
-
     public setX(x) {
         this.x = x;
     }
-
 
     public setY(y) {
         this.y = y;
     }
 
-
-    public setState(stateType, data, optprobability) {
+    public setStateProbability(stateType, data, optprobability) {
         this.states[stateType].setData(data);
         if (optprobability) {
             // this.stateManager.setProbability(stateType, optprobability);
@@ -180,6 +174,12 @@ class Worker extends Model {
         return this.stateManager;
     }
 
+    public startMove(toX : number, toY : number) {
+        var stateName = WorkerState.Types.MOVE_TO;
+        this.states[stateName].setData({x :  toX, y :  toY});
+        this.stateManager.setCurrentState(stateName);
+        this.onStateChange();
+    }
 
     public updateMarkovChain(neighbors) {
         for (var tail in WorkerState.Types) {

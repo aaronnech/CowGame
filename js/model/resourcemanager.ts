@@ -2,6 +2,7 @@ import Model = require('./model');
 import Map = require('./map');
 import SpacialHash = require('../util/spacialhash');
 import Resource = require('./resource');
+import Constants = require('../util/constants');
 
 class ResourceManager extends Model {
     private map : Map;
@@ -15,7 +16,7 @@ class ResourceManager extends Model {
         this.resources = new SpacialHash(
             this.map.getWidth(),
             this.map.getHeight(),
-            9);
+            Constants.BUCKET_SIZE);
         this.resourcesArray = [];
     }
 
