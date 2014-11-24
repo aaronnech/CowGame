@@ -10,6 +10,12 @@ class Constants {
     public static NUMBER_OF_Y_TILES : number =
         Constants.WORLD_HEIGHT / Constants.TILE_HEIGHT;
     public static BUCKET_SIZE : number = 40;
+    public static APP_CONTEXT_DOM_ID : string = 'app';
+
+    public static BUTTON_IDS : any = {
+        BUY_SILO : 'buy-silo',
+        BUY_COW : 'buy-cow'
+    };
 }
 
 export = Constants;

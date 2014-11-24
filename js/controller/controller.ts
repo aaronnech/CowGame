@@ -5,7 +5,7 @@ class Controller {
         this.setBindings();
     }
 
-    public bind(action : Action, f) {
+    public bind(action : Action, f : Function) {
         action.addBinding(this, f);
     }
 

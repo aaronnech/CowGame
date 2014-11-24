@@ -1,6 +1,7 @@
 import Controller = require('./controller');
 import Action = require('./action');
 import MarkoViewModel = require('../viewmodel/markoviewmodel');
+import Constants = require('../util/constants');
 
 class ClientController extends Controller {
     private viewModel : MarkoViewModel;
@@ -22,6 +23,8 @@ class ClientController extends Controller {
         this.bind(Action.ViewActions.MOUSE_UP_MAP, this.mouseUpMap);
         this.bind(Action.ViewActions.MOUSE_DOWN_MAP, this.mouseDownMap);
         this.bind(Action.ViewActions.RIGHT_CLICK_MAP, this.rightClickMap);
+
+        this.bind(Action.ViewActions.CLICK_BUTTON, this.clickButton);
     }
 
     public onRender() {
@@ -30,6 +33,17 @@ class ClientController extends Controller {
 
     public onUpdate() {
         this.viewModel.update();
+    }
+
+    public clickButton(source, id : string) {
+        switch(id) {
+            case Constants.BUTTON_IDS.BUY_SILO:
+                console.log('Clicked buy silo!');
+                break;
+            case Constants.BUTTON_IDS.BUY_COW:
+                console.log('Clicked buy cow!');
+                break;
+        }
     }
 
     public panCameraUp() {

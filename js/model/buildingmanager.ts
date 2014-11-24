@@ -7,7 +7,7 @@ import Constants = require('../util/constants');
 class BuildingManager extends Model {
     private map : Map;
     private buildings : SpacialHash;
-    private buildingsArray : any;
+    private buildingsArray : Building[];
 
     constructor(mapModel : Map) {
         super();
@@ -23,6 +23,11 @@ class BuildingManager extends Model {
     public addBuilding(buildingModel : Building) {
         this.buildings.add(buildingModel.getX(), buildingModel.getY(), buildingModel);
         this.buildingsArray.push(buildingModel);
+
+    }
+
+    public getBuildings() : Building[] {
+        return this.buildingsArray;
     }
 }
 

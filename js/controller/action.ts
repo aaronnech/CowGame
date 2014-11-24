@@ -21,7 +21,8 @@ class Action {
         MOVE_DOWN : new Action(),
         MOUSE_UP_MAP : new Action(),
         MOUSE_DOWN_MAP : new Action(),
-        RIGHT_CLICK_MAP : new Action()
+        RIGHT_CLICK_MAP : new Action(),
+        CLICK_BUTTON : new Action()
     };
 
     constructor() {
@@ -31,7 +32,7 @@ class Action {
     public fire = function(source, data) {
         for (var i = 0; i < this.bindings.length; i++) {
             this.bindings[i].callback.apply(
-                this.bindings[i].binder, source, data);
+                this.bindings[i].binder, [source, data]);
         }
     }
 

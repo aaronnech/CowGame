@@ -1,6 +1,8 @@
 /// <reference path="../def/easystar.d.ts" />
 import Model = require('../model/model');
 import Map = require('../model/map');
+import Building = require('../model/building');
+import BuildingManager = require('../model/buildingmanager');
 
 class PathGenerator {
     private static instance:PathGenerator = null;
@@ -12,38 +14,35 @@ class PathGenerator {
     };
 
     private map : Map;
+    private buildingManager : BuildingManager;
     private pathFinder : any;
 
-    public constructor(mapModel) {
-        // TODO: if other objects go on the map
-        // then also pass to constructor to use in grid building.
+    public constructor(mapModel, buildingManager : BuildingManager) {
         if (PathGenerator.instance) {
             throw new Error('Singleton already constructed');
         }
 
         this.map = mapModel;
+        this.buildingManager = buildingManager;
 
         console.log('constructing path finder..');
         this.pathFinder = new EasyStar.js();
         this.pathFinder.setAcceptableTiles([0]);
         this.pathFinder.setIterationsPerCalculation(1000);
 
-        console.log('Building collision map..');
-        this.updateCollisionMap();
-
         console.log('setting path generator instance');
         PathGenerator.instance = this;
     }
 
 
-    public static getInstance(optmapModel? : any) {
+    public static getInstance(optmapModel? : any, optbuildingmanager? : any) {
         if (PathGenerator.instance) {
             return PathGenerator.instance;
         }
-        if (!optmapModel) {
+        if (!optmapModel || !optbuildingmanager) {
             throw 'No map model provided for construction!';
         }
-        return new PathGenerator(optmapModel);
+        return new PathGenerator(optmapModel, optbuildingmanager);
     }
 
 
@@ -59,6 +58,19 @@ class PathGenerator {
             }
             result[y][x] = 0;
         });
+
+        // Add buildings
+        var buildings : Building[] = this.buildingManager.getBuildings();
+        for(var i : number = 0; i < buildings.length; i++) {
+            var building = buildings[i];
+            console.log(building);
+            // Block out building area
+            for (var x : number = building.getX(); x < building.getX() + building.getWidth(); x++) {
+                for (var y : number = building.getY(); y < building.getY() + building.getHeight(); y++) {
+                    result[y][x] = 1;
+                }
+            }
+        }
 
         console.log('done building map');
         console.log('collision map is dimension ' + result[0].length + ',' + result.length);

@@ -3,6 +3,7 @@ import Action = require('../controller/action');
 import Input = require('../input/input');
 import Camera = require('../model/camera');
 import CameraView = require('../view/cameraview');
+import DomButtonManager = require('../view/dombuttonmanager');
 import Map = require('../model/map');
 import MapView = require('../view/mapview');
 import Worker = require('../model/worker');
@@ -37,6 +38,8 @@ class MarkoViewModel extends ViewModel {
 
     private selector : Selector;
 
+    private buttonManager : DomButtonManager;
+
 	constructor() {
         super();
         console.log('CREATING MARKO GAME..');
@@ -48,7 +51,12 @@ class MarkoViewModel extends ViewModel {
             Constants.DISPLAY_WIDTH, Constants.DISPLAY_HEIGHT);
         this.pixiWorld = new PIXI.DisplayObjectContainer();
         this.pixiStage.addChild(this.pixiWorld);
-        document.body.appendChild(this.pixiRenderer.view);
+        document.getElementById(Constants.APP_CONTEXT_DOM_ID)
+                .appendChild(this.pixiRenderer.view);
+        document.getElementById(Constants.APP_CONTEXT_DOM_ID).style.position = 'relative';
+
+
+        // Setup Button Manager
 
         console.log('INITIALIZING INPUT..');
         // Input processor
@@ -75,8 +83,24 @@ class MarkoViewModel extends ViewModel {
             Constants.TILE_WIDTH);
         this.mapView = new MapView(this.map, this.camera, this.pixiWorld);
 
+        console.log('CREATING RESOURCE MANAGER..');
+        this.resourceManager = new ResourceManager(this.map);
+
+        console.log('SPAWNING INITIAL RESOURCES..');
+        this.resourceManager.spawnInitial();
+
+        console.log('CREATING BUILDING MANAGER..');
+        this.buildingManager = new BuildingManager(this.map);
+
         console.log('CREATING PATH GENERATOR..');
-        this.pathGenerator = PathGenerator.getInstance(this.map);
+        this.pathGenerator = PathGenerator.getInstance(this.map, this.buildingManager);
+
+        console.log('ADDING STARTER GRAINARY BUILDING..');
+        var grainary = new GrainSupply();
+        new GrainSupplyView(grainary, this.camera, this.pixiWorld);
+        grainary.setX(Constants.NUMBER_OF_X_TILES / 2);
+        grainary.setY(Constants.NUMBER_OF_Y_TILES / 2);
+        this.buildingManager.addBuilding(grainary);
 
         console.log('SPAWNING COLONY..');
         // Place a colony down (test for now)
@@ -88,26 +112,27 @@ class MarkoViewModel extends ViewModel {
             worker.onStateChange();
         }
 
-        console.log('CREATING RESOURCE MANAGER..');
-        this.resourceManager = new ResourceManager(this.map);
-
-        console.log('SPAWNING INITIAL RESOURCES..');
-        this.resourceManager.spawnInitial();
-
-        console.log('CREATING BUILDING MANAGER..');
-        this.buildingManager = new BuildingManager(this.map);
-
-        console.log('ADDING STARTER GRAINARY BUILDING..');
-        var grainary = new GrainSupply();
-        new GrainSupplyView(grainary, this.camera, this.pixiWorld);
-        this.buildingManager.addBuilding(grainary);
+        console.log('BUILDING COLLISION MAP..');
+        this.pathGenerator.updateCollisionMap();
 
         console.log('INITIALIZING SELECT HANDLER..');
         // Create select handler
         this.selector = new Selector(this.input, this.camera, this.pixiStage);
         this.selector.addSelectables(this.colony.getWorkers());
 
+        console.log('CREATING BUTTON MANAGER..');
+        this.buttonManager = new DomButtonManager(Constants.APP_CONTEXT_DOM_ID);
+
+        console.log('ADDING BUTTONS..');
+        this.buttonManager.addButton("Buy Silo", Constants.BUTTON_IDS.BUY_SILO, 'btn', 20, 40);
+        this.buttonManager.addButton("Buy Cow", Constants.BUTTON_IDS.BUY_COW, 'btn', 20, 20);
+
+
         console.log('BINDING INPUT..');
+        // Buttons
+        this.buttonManager.addClickAction(Constants.BUTTON_IDS.BUY_SILO, Action.ViewActions.CLICK_BUTTON);
+        this.buttonManager.addClickAction(Constants.BUTTON_IDS.BUY_COW, Action.ViewActions.CLICK_BUTTON);
+
         // Map interaction
         this.input.bindLeftMouseDownAction(Action.ViewActions.MOUSE_DOWN_MAP, undefined);
         this.input.bindLeftMouseUpAction(Action.ViewActions.MOUSE_UP_MAP, undefined);
