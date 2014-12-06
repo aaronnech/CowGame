@@ -12,6 +12,14 @@ class DOMButtonManager {
         this.appContext = document.getElementById(appContext);
     }
 
+    public removeAll() {
+        for (var key in this.buttons) {
+            if(this.buttons.hasOwnProperty(key)) {
+                this.appContext.removeChild(this.buttons[key]);
+            }
+        }
+    }
+
     public addButton(name : string, id : string, cls : string, x : number, y : number) {
         var btn = document.createElement('button');
         var text = document.createTextNode(name);

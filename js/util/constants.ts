@@ -14,7 +14,13 @@ class Constants {
 
     public static BUTTON_IDS : any = {
         BUY_SILO : 'buy-silo',
-        BUY_COW : 'buy-cow'
+        BUY_COW : 'buy-cow',
+        PLAY : 'play'
+    };
+
+    public static SCREENS : any = {
+        MENU : 'menu',
+        GAME : 'game'
     };
 }
 

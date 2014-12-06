@@ -43,35 +43,60 @@ class ClientController extends Controller {
             case Constants.BUTTON_IDS.BUY_COW:
                 console.log('Clicked buy cow!');
                 break;
+            case Constants.BUTTON_IDS.PLAY:
+                console.log('Clicked play!');
+                this.viewModel.setScreen(Constants.SCREENS.GAME);
+                break;
         }
     }
 
     public panCameraUp() {
-        this.viewModel.panCameraUp();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.panCameraUp();
+        }
     }
 
     public panCameraDown() {
-        this.viewModel.panCameraDown();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.panCameraDown();
+        }
     }
 
     public panCameraLeft() {
-        this.viewModel.panCameraLeft();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.panCameraLeft();
+        }
     }
 
     public panCameraRight() {
-        this.viewModel.panCameraRight();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.panCameraRight();
+        }
     }
 
     public mouseUpMap() {
-        this.viewModel.mouseUpMap();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.mouseUpMap();
+        }
     }
 
     public mouseDownMap() {
-        this.viewModel.mouseDownMap();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.mouseDownMap();
+        }
     }
 
     public rightClickMap() {
-        this.viewModel.rightClickMap();
+        if (this.viewModel.getCurrentScreenName() == Constants.SCREENS.GAME) {
+            var vm : GameViewModel = <GameViewModel> this.viewModel.getCurrentScreen();
+            vm.rightClickMap();
+        }
     }
 }
 
