@@ -1,13 +1,12 @@
-import ViewModel = require('./viewmodel');
 import DOMButtonManager = require('../view/dombuttonmanager');
 import Screen = require('./screen');
 import Constants = require('../util/constants');
 import Action = require('../controller/action');
 
-class MenuViewModel extends ViewModel implements Screen {
+class MenuViewModel implements Screen {
     private pixiStage : any;
     private pixiWorld : any;
-    private buttonManager : DomButtonManager;
+    private buttonManager : DOMButtonManager;
 
     constructor(pixiStage, pixiWorld) {
         this.pixiStage = pixiStage;
@@ -28,6 +27,13 @@ class MenuViewModel extends ViewModel implements Screen {
         fn();
     }
 
+    public onRender() {
+        // Do nothing
+    }
+
+    public onUpdate(delta) {
+        // Do nothing
+    }
 }
 
 export = MenuViewModel;

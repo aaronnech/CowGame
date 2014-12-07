@@ -1,5 +1,0 @@
-class ViewModel {
-	
-}
-
-export = ViewModel;

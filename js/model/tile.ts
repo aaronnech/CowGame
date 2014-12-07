@@ -1,7 +1,11 @@
 import Model = require('./model');
 
 class Tile extends Model {
-    private color : number;
+    private static TYPES : any = {
+        GRASS : 1
+    };
+
+    private type : number;
     private width : number;
     private height : number;
     private isOccupied : boolean;
@@ -9,7 +13,7 @@ class Tile extends Model {
     constructor(width, height) {
         super();
         this.isOccupied = false;
-        this.color = Math.random() > 0.5 ? null : 0x33AA33;
+        this.type = Tile.TYPES.GRASS;
         this.width = width;
         this.height = height;
     }
@@ -24,8 +28,8 @@ class Tile extends Model {
     }
 
 
-    public getColor() {
-        return this.color;
+    public getType() {
+        return this.type;
     }
 
 

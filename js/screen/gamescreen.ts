@@ -1,4 +1,3 @@
-import ViewModel = require('./viewmodel');
 import Action = require('../controller/action');
 import Input = require('../input/input');
 import Camera = require('../model/camera');
@@ -18,7 +17,10 @@ import PathGenerator = require('../util/pathgenerator');
 import Constants = require('../util/constants');
 import Screen = require('./screen');
 
-class GameViewModel extends ViewModel implements Screen {
+class GameScreen implements Screen {
+    // Image for the base grass layer of the map
+    private static IMAGE_GRASS =  PIXI.Texture.fromImage('img/grass.png');
+
     private pixiStage : any;
     private pixiWorld : any;
     private pixiRenderer : any;
@@ -42,7 +44,6 @@ class GameViewModel extends ViewModel implements Screen {
     private buttonManager : DomButtonManager;
 
     constructor(pixiStage, pixiWorld, pixiRenderer) {
-        super();
         this.pixiStage = pixiStage;
         this.pixiWorld = pixiWorld;
         this.pixiRenderer = pixiRenderer;
@@ -76,6 +77,11 @@ class GameViewModel extends ViewModel implements Screen {
             Constants.TILE_WIDTH);
         this.mapView = new MapView(this.map, this.camera, this.pixiWorld);
 
+        console.log('ADDING BASE GRASS BACKGROUND..');
+        var backgroundSprite = new PIXI.TilingSprite(
+            GameScreen.IMAGE_GRASS, Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
+        this.pixiWorld.addChild(backgroundSprite);
+
         console.log('CREATING RESOURCE MANAGER..');
         this.resourceManager = new ResourceManager(this.map);
 
@@ -97,13 +103,7 @@ class GameViewModel extends ViewModel implements Screen {
 
         console.log('SPAWNING COLONY..');
         // Place a colony down (test for now)
-        this.colony = new WorkerColony(this.map);
-        for (var i = 0; i < 20; i++) {
-            var worker = new Worker();
-            new WorkerView(worker, this.camera, this.pixiWorld);
-            this.colony.addWorker(worker);
-            worker.onStateChange();
-        }
+        this.colony = new WorkerColony(this.map, grainary);
 
         console.log('BUILDING COLLISION MAP..');
         this.pathGenerator.updateCollisionMap();
@@ -153,7 +153,11 @@ class GameViewModel extends ViewModel implements Screen {
         fn();
     }
 
-    public update() {
+    public onRender() {
+        this.pixiRenderer.render(this.pixiStage);
+    }
+
+    public onUpdate(delta : number) {
         // Update the models that have to be updated
         // every game loop here
         this.input.update();
@@ -171,6 +175,14 @@ class GameViewModel extends ViewModel implements Screen {
         for (var i = 0; i < selected.length; i++) {
             selected[i].startMove(x, y);
         }
+    }
+
+    public makeWorker() {
+        var worker = new Worker();
+        var view = new WorkerView(worker, this.camera, this.pixiWorld);
+        this.colony.addWorker(worker);
+        worker.onStateChange();
+        view.notify();
     }
 
     public mouseDownMap() {
@@ -198,4 +210,4 @@ class GameViewModel extends ViewModel implements Screen {
     }
 }
 
-export = GameViewModel;
+export = GameScreen;

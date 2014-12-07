@@ -1,5 +1,6 @@
 import Model = require('./model');
 import Map = require('./map');
+import GrainSupply = require('./grainsupply');
 import SpacialHash = require('../util/spacialhash');
 import Worker = require('./worker');
 import Constants = require('../util/constants');
@@ -7,12 +8,14 @@ import Constants = require('../util/constants');
 class WorkerColony extends Model {
 
     private map : Map;
+    private grainSupply : GrainSupply;
     private workers : SpacialHash;
     private workersArray : any;
 
-    constructor(mapModel : Map) {
+    constructor(mapModel : Map, grainSupply : GrainSupply) {
         super();
         this.map = mapModel;
+        this.grainSupply = grainSupply;
         this.workers = new SpacialHash(
             this.map.getWidth(),
             this.map.getHeight(),
@@ -28,19 +31,17 @@ class WorkerColony extends Model {
     }
 
     public addWorker(workerModel) {
-        var randomX = this.map.randomTileX();
-        var randomY = this.map.randomTileY();
-        workerModel.setX(randomX);
-        workerModel.setY(randomY);
-        this.workers.add(randomX, randomY, workerModel);
+        var x = this.grainSupply.getX() - 1;
+        var y = this.grainSupply.getY() - 1;
+        workerModel.setX(x);
+        workerModel.setY(y);
+        this.workers.add(x, y, workerModel);
         this.workersArray.push(workerModel);
     }
-
 
     public getWorkers() {
         return this.workers;
     }
-
 
     public update() {
         for (var i = 0; i < this.workersArray.length; i++) {
@@ -50,6 +51,7 @@ class WorkerColony extends Model {
 
             this.workersArray[i].update(this.workers);
 
+            // Update spacial hashing
             var afterX = worker.getX();
             var afterY = worker.getY();
             if (beforeX != afterX || beforeY != afterY) {

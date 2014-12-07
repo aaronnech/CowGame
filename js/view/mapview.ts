@@ -1,8 +1,9 @@
 import Camera = require('../model/camera');
 import Map = require('../model/map');
+import Tile = require('../model/tile');
 import PixiView = require('./pixiview');
 
-class MapView extends PixiView{
+class MapView extends PixiView {
     private map : Map;
     private camera : Camera;
 
@@ -13,23 +14,21 @@ class MapView extends PixiView{
     }
 
     public makePixiStageMember() {
-        var graphics = new PIXI.Graphics();
+        // var graphics = new PIXI.Graphics();
         var camX = this.camera.getX();
         var camY = this.camera.getY();
         var camW = this.camera.getWidth();
         var camH = this.camera.getHeight();
 
         this.map.forEachTileInRect(camX, camY, camW, camH, function (tile, x, y) {
-            if (tile.getColor()) {
-                var width = tile.getWidth();
-                var height = tile.getHeight();
-                graphics.beginFill(tile.getColor());
-                graphics.drawRect(x * width, y * height, width, height);
-                graphics.endFill();
-            }
+            // var width = tile.getWidth();
+            // var height = tile.getHeight();
+            // if (tile.getType() == Tile.TYPES.GRASS)
+                // Do nothing since the default is grass.
+            // }
         });
 
-        return graphics;
+        return null;
     }
 
 
