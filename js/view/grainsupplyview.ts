@@ -22,16 +22,21 @@ class GrainSupplyView extends PixiView {
     }
 
     public makePixiStageMember() {
+        var selectedContainer = new PIXI.DisplayObjectContainer();
         var x = this.grainSupply.getX() * Constants.TILE_WIDTH;
         var y = this.grainSupply.getY() * Constants.TILE_HEIGHT;
         if (this.camera.modelInView(this.grainSupply)) {
             this.sprite.visible = true;
             this.sprite.position.x = x;
             this.sprite.position.y = y;
+            if (this.grainSupply.isSelected()) {
+                selectedContainer.addChild(PixiView.getBoundingBox(this.grainSupply, 0xFF0000));
+            }
         } else {
             this.sprite.visible = false;
         }
-        return this.sprite;
+        selectedContainer.addChild(this.sprite);
+        return selectedContainer;
     }
 
     public notify() {

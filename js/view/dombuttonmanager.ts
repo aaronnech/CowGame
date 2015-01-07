@@ -4,12 +4,14 @@ class DOMButtonManager {
     private buttons : any;
     private buttonsActions : any
     private appContext : any;
+    private disabled : boolean;
 
 
     constructor(appContext : string) {
         this.buttons = {};
         this.buttonsActions = {};
         this.appContext = document.getElementById(appContext);
+        this.disabled = false;
     }
 
     public removeAll() {
@@ -35,8 +37,10 @@ class DOMButtonManager {
         this.buttons[id] = btn;
         this.buttonsActions[id] = [];
         this.addBrowserEventListener(btn, 'click', () => {
-            for (var i : number = 0; i < this.buttonsActions[id].length; i++) {
-                this.buttonsActions[id][i].fire(this, id);
+            if (!this.disabled) {
+                for (var i : number = 0; i < this.buttonsActions[id].length; i++) {
+                    this.buttonsActions[id][i].fire(this, id);
+                }
             }
         });
     }
@@ -44,6 +48,24 @@ class DOMButtonManager {
     public addClickAction(id : string, act : Action) {
         if (typeof this.buttonsActions[id] != 'undefined' && typeof act != 'undefined')
             this.buttonsActions[id].push(act);
+    }
+
+    public disableAllButtons() {
+        for (var key in this.buttons) {
+            if(this.buttons.hasOwnProperty(key)) {
+                this.buttons[key].disabled = true;
+            }
+        }
+        this.disabled = true;
+    }
+
+    public enableAllButtons() {
+        for (var key in this.buttons) {
+            if(this.buttons.hasOwnProperty(key)) {
+                this.buttons[key].disabled = false;
+            }
+        }
+        this.disabled = false;
     }
 
     private addBrowserEventListener(element, name, callback) {

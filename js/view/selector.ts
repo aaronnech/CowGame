@@ -1,10 +1,12 @@
 import Input = require('../input/input');
 import Camera = require('../model/camera');
 import PixiView = require('./pixiview');
+import PhysicalModel = require('../model/physicalmodel');
 import Constants = require('../util/constants');
 
 class Selector extends PixiView {
     private static CLICK_THRESHOLD : number = 10;
+    private static BULK_SELECT_ENABLED : boolean = false;
 
     private input : Input;
     private camera : Camera;
@@ -28,7 +30,7 @@ class Selector extends PixiView {
     }
 
     public makePixiStageMember() {
-        if (this.dragging) {
+        if (this.dragging && Selector.BULK_SELECT_ENABLED) {
             var graphics = new PIXI.Graphics();
             var color = 0xFF0000;
             graphics.lineStyle(5, color);
@@ -68,11 +70,8 @@ class Selector extends PixiView {
             console.log("CLICK NOT DRAG");
             var x = Math.floor((this.startX + this.camera.getX()) / Constants.TILE_WIDTH);
             var y = Math.floor((this.startY + this.camera.getY()) / Constants.TILE_HEIGHT);
-            var selected = this.selectAtCoordinates(x, y);
-            if (selected) {
-                selected.onSelect();
-            }
-        } else {
+            this.selectAtCoordinates(x, y);
+        } else if (Selector.BULK_SELECT_ENABLED) {
             console.log("DRAG NOT CLICK");
             var x1 = Math.floor((this.startX + this.camera.getX()) / Constants.TILE_WIDTH);
             var y1 = Math.floor((this.startY + this.camera.getY()) / Constants.TILE_HEIGHT);
@@ -105,17 +104,29 @@ class Selector extends PixiView {
         }
     }
 
+    public addToSelected(selectable : PhysicalModel) {
+        this.selected.push(selectable);
+        selectable.onSelect();
+    }
+
     public selectAtCoordinates(x, y) {
+        console.log('Selecting at coordinates ' + x + ',' + y);
         this.deselectAll();
+        console.log('deselected existing..');
 
         // select new selectable
+        console.log('checking all selectable spacial hashes (' + this.selectables.length + ' total)');
         for (var i = 0; i < this.selectables.length; i++) {
             var inArea = this.selectables[i].getAll(x, y);
-            for (var i = 0; i < inArea.length; i++) {
-                var candidate = inArea[i];
-                if (candidate.getX() == x &&
-                    candidate.getY() == y) {
-                    this.selected.push(candidate);
+            console.log('found ' + inArea.length + ' selectables');
+            console.log(this.selectables);
+            for (var j = 0; j < inArea.length; j++) {
+                var candidate : PhysicalModel = <PhysicalModel> (inArea[j]);
+                var cx = candidate.getX();
+                var cy = candidate.getY();
+                if (x >= cx && x < cx + candidate.getWidth() &&
+                    y >= cy && y < cy + candidate.getHeight()) {
+                    this.addToSelected(candidate);
                     return candidate;
                 }
             }
@@ -138,8 +149,7 @@ class Selector extends PixiView {
                 var candidate = inArea[i];
                 if (candidate.getX() >= minX && candidate.getX() <= maxX &&
                     candidate.getY() >= minY && candidate.getY() <= maxY) {
-                    this.selected.push(candidate);
-                    candidate.onSelect();
+                    this.addToSelected(candidate);
                 }
             }
         }

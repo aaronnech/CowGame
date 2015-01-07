@@ -5,7 +5,7 @@ import MarkovState = require('./markovstate');
 import SelectableModel = require('./selectablemodel');
 import PhysicalModel = require('./physicalmodel');
 
-class Worker extends Model implements SelectableModel, PhysicalModel {
+class Zombie extends Model implements SelectableModel, PhysicalModel {
     public static SPEED : number = 0.1;
 
     private selected : boolean;
@@ -225,4 +225,4 @@ class Worker extends Model implements SelectableModel, PhysicalModel {
     }
 }
 
-export = Worker;
+export = Zombie;

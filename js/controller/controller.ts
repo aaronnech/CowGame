@@ -27,7 +27,7 @@ class Controller {
         throw new Error('Abstact Method called!');
     }
 
-    public callScreenAction(screenName : string, screenFn : string, args : any) {
+    public callScreenAction(screenName : string, screenFn : string, args? : any) {
         var screen = this.game.getScreen(screenName);
         if (screen && this.game.getCurrentScreen() == screen) {
             screen[screenFn].apply(screen, args);

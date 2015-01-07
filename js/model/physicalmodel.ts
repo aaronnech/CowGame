@@ -5,6 +5,7 @@ interface PhysicalModel {
     setY(y : number) : void;
     getWidth() : number;
     getHeight() : number;
+    onSelect() : void;
 }
 
 export = PhysicalModel;

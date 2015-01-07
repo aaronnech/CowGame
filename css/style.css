@@ -1,0 +1,37 @@
+.btn {
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    background: #3498db;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background: #3cb0fd;
+    text-decoration: none;
+}
+
+.wrapper {
+    width: 66%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.wrapper .top {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.wrapper .top img {
+    max-width: 320px;
+    margin-left: 20px;
+}
+
+#app {
+    width: 800px;
+    height: 600px;
+    margin: 0 auto;
+    margin-top: -10px;
+}

@@ -24,6 +24,7 @@ class ClientController extends Controller {
         switch(id) {
             case Constants.BUTTON_IDS.BUY_SILO:
                 console.log('Clicked buy silo!');
+                this.callScreenAction(Constants.SCREENS.GAME, 'startPlace', [0]);
                 break;
             case Constants.BUTTON_IDS.BUY_COW:
                 console.log('Clicked buy cow!');

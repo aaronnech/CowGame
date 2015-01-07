@@ -1,5 +1,7 @@
 import Model = require('../model/model');
+import PhysicalModel = require('../model/physicalmodel');
 import Camera = require('../model/camera');
+import Constants = require('../util/constants');
 
 class PixiView {
     private models : Model[];
@@ -38,7 +40,6 @@ class PixiView {
         }
     }
 
-
     public dispose() {
         if (this.pixiChild) {
             this.pixiStage.removeChild(this.pixiChild);
@@ -48,7 +49,6 @@ class PixiView {
         }
     }
 
-
     public makePixiStageMember() {
         throw new Error('This method is abstract');
         return null;
@@ -57,6 +57,17 @@ class PixiView {
     public notify() {
         throw new Error('This method is abstract');
         return null;
+    }
+
+    public static getBoundingBox(model : PhysicalModel, color : number) {
+        var graphics = new PIXI.Graphics();
+        graphics.lineStyle(5, color);
+        var x : number = model.getX() * Constants.TILE_WIDTH;
+        var y : number = model.getY() * Constants.TILE_HEIGHT;
+        var w : number = model.getWidth() * Constants.TILE_WIDTH;
+        var h : number = model.getHeight() * Constants.TILE_HEIGHT;
+        graphics.drawRect(x, y, w, h);
+        return graphics;
     }
 }
 

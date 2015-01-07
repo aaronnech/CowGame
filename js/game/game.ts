@@ -84,11 +84,11 @@ class Game {
         function loop() {
             var delta = 1;
             if (self.lastUpdate) {
-                var now = Date.now();
+                var now = Date.now() / 1000.0;
                 delta = now - self.lastUpdate;
                 self.lastUpdate = now;
             } else {
-                self.lastUpdate = Date.now();
+                self.lastUpdate = Date.now() / 1000.0;
             }
 
             if (!self.running) {

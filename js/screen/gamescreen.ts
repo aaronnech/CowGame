@@ -10,16 +10,25 @@ import WorkerView = require('../view/workerview');
 import WorkerColony = require('../model/workercolony');
 import ResourceManager = require('../model/resourcemanager');
 import BuildingManager = require('../model/buildingmanager');
+import Building = require('../model/building');
 import GrainSupply = require('../model/grainsupply');
 import GrainSupplyView = require('../view/grainsupplyview');
+import Turret = require('../model/turret');
+import TurretView = require('../view/turretview');
 import Selector = require('../view/selector');
 import PathGenerator = require('../util/pathgenerator');
 import Constants = require('../util/constants');
 import Screen = require('./screen');
+import HUDView = require('../view/hudview');
 
 class GameScreen implements Screen {
     // Image for the base grass layer of the map
-    private static IMAGE_GRASS =  PIXI.Texture.fromImage('img/grass.png');
+    private static IMAGE_GRASS = PIXI.Texture.fromImage('img/grass.png');
+
+    private placeModeFade : any;
+    private placingBuilding : Building;
+
+    private hud : HUDView;
 
     private pixiStage : any;
     private pixiWorld : any;
@@ -38,19 +47,41 @@ class GameScreen implements Screen {
     private colony : WorkerColony;
     private resourceManager : ResourceManager;
     private buildingManager : BuildingManager;
+    private zombieManager : Zombie
 
     private selector : Selector;
 
     private buttonManager : DomButtonManager;
 
+    private topText : any;
+
     constructor(pixiStage, pixiWorld, pixiRenderer) {
         this.pixiStage = pixiStage;
         this.pixiWorld = pixiWorld;
         this.pixiRenderer = pixiRenderer;
+
+        // Grab fill rectangle
+        this.placeModeFade = this.getFillRectangle(0x000000, 0.5);
+    }
+
+    private getFillRectangle(color : number, alpha : number) {
+        var graphics = new PIXI.Graphics();
+        graphics.beginFill(color, alpha);
+        graphics.drawRect(0, 0, Constants.DISPLAY_WIDTH, Constants.DISPLAY_HEIGHT);
+
+        return graphics;
     }
 
     public onEnterScreen() {
+        this.placingBuilding = null;
+
         // Setup Button Manager
+
+        console.log('CREATING FPS COUNTER...');
+        this.topText = new PIXI.Text('0 FPS / 0 DELTA');
+        this.topText.x = Constants.DISPLAY_WIDTH / 2;
+        this.topText.y = 10;
+        this.pixiStage.addChild(this.topText);
 
         console.log('INITIALIZING INPUT..');
         // Input processor
@@ -112,14 +143,18 @@ class GameScreen implements Screen {
         // Create select handler
         this.selector = new Selector(this.input, this.camera, this.pixiStage);
         this.selector.addSelectables(this.colony.getWorkers());
+        this.selector.addSelectables(this.buildingManager.getBuildings());
 
         console.log('CREATING BUTTON MANAGER..');
         this.buttonManager = new DomButtonManager(Constants.APP_CONTEXT_DOM_ID);
 
         console.log('ADDING BUTTONS..');
-        this.buttonManager.addButton("Buy Silo", Constants.BUTTON_IDS.BUY_SILO, 'btn', 20, 40);
-        this.buttonManager.addButton("Buy Cow", Constants.BUTTON_IDS.BUY_COW, 'btn', 20, 20);
+        this.buttonManager.addButton("Buy Silo", Constants.BUTTON_IDS.BUY_SILO, 'btn', 180, 540);
+        this.buttonManager.addButton("Buy Cow", Constants.BUTTON_IDS.BUY_COW, 'btn', 300, 540);
 
+
+        console.log('ADDING HUD..');
+        this.hud = new HUDView(this.pixiStage);
 
         console.log('BINDING INPUT..');
         // Buttons
@@ -155,6 +190,7 @@ class GameScreen implements Screen {
 
     public onRender() {
         this.pixiRenderer.render(this.pixiStage);
+
     }
 
     public onUpdate(delta : number) {
@@ -164,6 +200,8 @@ class GameScreen implements Screen {
         this.colony.update();
         this.camera.update();
         this.selector.handleDragging();
+        this.topText.setText(Math.round(1.0 / delta) + ' FPS');
+        this.maybeUpdateBuildingPlacement();
     }
 
     public rightClickMap() {
@@ -173,8 +211,64 @@ class GameScreen implements Screen {
         var y = this.map.toTileY(this.input.getMouseY() + this.camera.getY());
         console.log('right click at (' + x + ',' + y + ')');
         for (var i = 0; i < selected.length; i++) {
-            selected[i].startMove(x, y);
+            if (typeof(selected[i].startMove) != 'undefined')
+                selected[i].startMove(x, y);
         }
+    }
+
+    private maybeUpdateBuildingPlacement() {
+        if (this.placingBuilding) {
+            var oldX = this.placingBuilding.getX();
+            var oldY = this.placingBuilding.getY();
+            var x = this.map.toTileX(this.input.getMouseX() + this.camera.getX());
+            var y = this.map.toTileY(this.input.getMouseY() + this.camera.getY());
+
+            if (oldX != x || oldY != y) {
+                this.placingBuilding.setX(x);
+                this.placingBuilding.setY(y);
+                this.placingBuilding.setLocationOkay(this.isPlaceOkay());
+                this.placingBuilding.notifyChange();
+            }
+        }
+    }
+
+    public startPlace(buildingType : number) {
+        console.log('START PLACE CALLED WITH TYPE ' + buildingType);
+        this.pixiStage.addChild(this.placeModeFade);
+        this.buttonManager.disableAllButtons();
+
+        this.placingBuilding = new Turret();
+        new TurretView(this.placingBuilding, this.camera, this.pixiWorld);
+
+        this.selector.deselectAll();
+        this.selector.addToSelected(this.placingBuilding);
+    }
+
+    public isPlaceOkay() {
+        if (this.placingBuilding) {
+            var buildings : Building[] = this.buildingManager.getBuildingsArray();
+            for (var i = 0; i < buildings.length; i++) {
+                if (buildings[i].overlaps(this.placingBuilding)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public endPlace() {
+        if (this.isPlaceOkay()) {
+            this.buildingManager.addBuilding(this.placingBuilding);
+            this.pathGenerator.updateCollisionMap();
+        } else {
+            this.placingBuilding.dispose();
+        }
+
+        this.placingBuilding = null;
+        this.pixiStage.removeChild(this.placeModeFade);
+        this.buttonManager.enableAllButtons();
+        this.selector.deselectAll();
     }
 
     public makeWorker() {
@@ -190,7 +284,11 @@ class GameScreen implements Screen {
     }
 
     public mouseUpMap() {
-        this.selector.onMouseUp();
+        if (this.placingBuilding) {
+            this.endPlace();
+        } else {
+            this.selector.onMouseUp();
+        }
     }
 
     public panCameraLeft() {

@@ -131,7 +131,7 @@ class Input {
     }
 
 
-    public getMouseY = function () {
+    public getMouseY() {
         return this.mouseY;
     }
 

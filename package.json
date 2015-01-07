@@ -12,13 +12,13 @@
     "build": "npm install && npm run-script compile && npm run-script serve"
   },
   "dependencies": {
-    "express": "4.9.7",
-    "mongodb": "^1.4.19",
-    "socket.io": "^1.1.0",
-    "body-parser": "~1.9.0"
+    "express": "latest",
+    "mongodb": "latest",
+    "socket.io": "latest",
+    "body-parser": "latest"
   },
   "devDependencies": {
-    "typescript": "1.1.0-1"
+    "typescript": "latest"
   },
   "author": "Aaron Nech",
   "license": "N/A"

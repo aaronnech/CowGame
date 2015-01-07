@@ -12,6 +12,8 @@ class Constants {
     public static BUCKET_SIZE : number = 40;
     public static APP_CONTEXT_DOM_ID : string = 'app';
 
+    public static BASE_WAVE_SIZE : number = 5;
+
     public static BUTTON_IDS : any = {
         BUY_SILO : 'buy-silo',
         BUY_COW : 'buy-cow',

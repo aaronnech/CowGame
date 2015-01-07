@@ -5,7 +5,7 @@ import Building = require('../model/building');
 import BuildingManager = require('../model/buildingmanager');
 
 class PathGenerator {
-    private static instance:PathGenerator = null;
+    private static instance : PathGenerator = null;
     public static ManhattanDirection = {
         MOVE_NORTH: 0,
         MOVE_WEST: 1,
@@ -60,7 +60,7 @@ class PathGenerator {
         });
 
         // Add buildings
-        var buildings : Building[] = this.buildingManager.getBuildings();
+        var buildings : Building[] = this.buildingManager.getBuildingsArray();
         for(var i : number = 0; i < buildings.length; i++) {
             var building = buildings[i];
             console.log(building);

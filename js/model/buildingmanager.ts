@@ -23,10 +23,13 @@ class BuildingManager extends Model {
     public addBuilding(buildingModel : Building) {
         this.buildings.add(buildingModel.getX(), buildingModel.getY(), buildingModel);
         this.buildingsArray.push(buildingModel);
-
     }
 
-    public getBuildings() : Building[] {
+    public getBuildings() : SpacialHash {
+        return this.buildings;
+    }
+
+    public getBuildingsArray() : Building[] {
         return this.buildingsArray;
     }
 }
